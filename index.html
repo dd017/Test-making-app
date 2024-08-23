@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Maker App</title>
+    <title>Enhanced Test Maker App</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
         .container { width: 80%; margin: 20px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -15,10 +15,13 @@
         .form-group button:hover { background-color: #0056b3; }
         .question-container, .pool-container { margin-top: 20px; }
         .question-preview { margin-top: 10px; }
-        .question-preview button { background-color: #dc3545; }
-        .question-preview button:hover { background-color: #c82333; }
-        .test-preview { margin-top: 20px; }
+        .test-preview, .question-edit { margin-top: 20px; }
+        .test-preview div, .question-edit div { margin-bottom: 10px; }
+        .test-preview h2, .question-edit h2 { margin-bottom: 10px; }
+        .question-edit input, .question-edit select { margin-bottom: 10px; }
         .profile-container { margin-top: 20px; }
+        .error { color: red; }
+        .success { color: green; }
     </style>
 </head>
 <body>
@@ -141,6 +144,32 @@
         <div class="pool-container" id="pool-container"><h2>Question Pools</h2></div>
     </div>
 
+    <div class="container" id="question-edit" style="display: none;">
+        <h1>Edit Question</h1>
+        <div class="question-edit">
+            <div>
+                <label for="edit-question-text">Question Text:</label>
+                <input type="text" id="edit-question-text">
+            </div>
+            <div>
+                <label for="edit-question-type">Question Type:</label>
+                <select id="edit-question-type" onchange="toggleEditOptions()">
+                    <option value="multiple-choice">Multiple Choice</option>
+                    <option value="true-false">True/False</option>
+                    <option value="short-answer">Short Answer</option>
+                </select>
+            </div>
+            <div id="edit-options" style="display: none;">
+                <label for="edit-options-text">Options (comma-separated):</label>
+                <input type="text" id="edit-options-text">
+            </div>
+            <div>
+                <button onclick="saveEditedQuestion()">Save Changes</button>
+                <button onclick="cancelEdit()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let questionCount = 0;
         let poolCount = 0;
@@ -148,36 +177,22 @@
         let loggedInUser = null;
         const pools = {};
         const tests = {};
+        let currentEditingQuestionId = null;
 
         function toggleForm(form) {
             document.getElementById('login-form').style.display = form === 'login' ? 'block' : 'none';
             document.getElementById('signup-form').style.display = form === 'signup' ? 'block' : 'none';
-            document.getElementById('profile-page').style.display = 'none';
-            document.getElementById('test-maker').style.display = 'none';
-            document.getElementById('pool-manager').style.display = 'none';
-        }
-
-        function showProfile() {
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('signup-form').style.display = 'none';
-            document.getElementById('profile-page').style.display = 'block';
-            document.getElementById('test-maker').style.display = 'none';
-            document.getElementById('pool-manager').style.display = 'none';
-            document.getElementById('profile-username').value = loggedInUser ? loggedInUser.username : '';
-            document.getElementById('profile-email').value = loggedInUser ? loggedInUser.email : '';
-        }
-
-        function toggleEditProfile() {
-            document.getElementById('edit-profile-form').style.display = 
-                document.getElementById('edit-profile-form').style.display === 'none' ? 'block' : 'none';
+            document.getElementById('profile-page').style.display = form === 'profile' ? 'block' : 'none';
+            document.getElementById('test-maker').style.display = form === 'test-maker' ? 'block' : 'none';
+            document.getElementById('pool-manager').style.display = form === 'pool-manager' ? 'block' : 'none';
+            document.getElementById('question-edit').style.display = form === 'question-edit' ? 'block' : 'none';
         }
 
         function login() {
             const username = document.getElementById('login-username').value;
             const password = document.getElementById('login-password').value;
             if (username && password) {
-                loggedInUser = { username, email: `${username}@example.com` };
-                alert('Login successful!');
+                loggedInUser = { username };
                 document.getElementById('profile-button').style.display = 'inline-block';
                 document.getElementById('logout-button').style.display = 'inline-block';
                 toggleForm('test-maker');
@@ -204,6 +219,18 @@
             toggleForm('login');
         }
 
+        function showProfile() {
+            if (loggedInUser) {
+                document.getElementById('profile-username').value = loggedInUser.username;
+                document.getElementById('profile-email').value = loggedInUser.email || '';
+                toggleForm('profile');
+            }
+        }
+
+        function toggleEditProfile() {
+            document.getElementById('edit-profile-form').style.display = 'block';
+        }
+
         function saveProfile() {
             const newUsername = document.getElementById('edit-username').value;
             const newEmail = document.getElementById('edit-email').value;
@@ -224,38 +251,33 @@
             testCount++;
             const container = document.getElementById('question-container');
             const questionDiv = document.createElement('div');
+            questionDiv.id = `question-${testCount}`;
             questionDiv.innerHTML = `
-                <div id="question-${testCount}">
-                    <h3>Question ${testCount}</h3>
-                    <div class="form-group">
-                        <label for="question-text-${testCount}">Question Text:</label>
-                        <input type="text" id="question-text-${testCount}" oninput="updatePreview()">
-                    </div>
-                    <div class="form-group">
-                        <label for="question-type-${testCount}">Question Type:</label>
-                        <select id="question-type-${testCount}" onchange="toggleOptions(${testCount})">
-                            <option value="multiple-choice">Multiple Choice</option>
-                            <option value="true-false">True/False</option>
-                            <option value="short-answer">Short Answer</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="options-${testCount}" style="display: none;">
-                        <label>Options (comma-separated):</label>
-                        <input type="text" id="options-text-${testCount}" oninput="updatePreview()">
-                    </div>
-                    <div class="form-group">
-                        <button onclick="previewQuestion(${testCount})">Preview</button>
-                        <button onclick="removeQuestion(${testCount})">Remove</button>
-                    </div>
-                    <div id="question-preview-${testCount}" class="question-preview"></div>
+                <h3>Question ${testCount}</h3>
+                <div class="form-group">
+                    <label for="question-text-${testCount}">Question Text:</label>
+                    <input type="text" id="question-text-${testCount}" oninput="updatePreview()">
                 </div>
+                <div class="form-group">
+                    <label for="question-type-${testCount}">Question Type:</label>
+                    <select id="question-type-${testCount}" onchange="toggleOptions(${testCount})">
+                        <option value="multiple-choice">Multiple Choice</option>
+                        <option value="true-false">True/False</option>
+                        <option value="short-answer">Short Answer</option>
+                    </select>
+                </div>
+                <div class="form-group" id="options-${testCount}" style="display: none;">
+                    <label>Options (comma-separated):</label>
+                    <input type="text" id="options-text-${testCount}" oninput="updatePreview()">
+                </div>
+                <div class="form-group">
+                    <button onclick="editQuestion(${testCount})">Edit</button>
+                    <button onclick="removeQuestion(${testCount})">Remove</button>
+                </div>
+                <div id="question-preview-${testCount}" class="question-preview"></div>
             `;
             container.appendChild(questionDiv);
-            document.getElementById('test-title').value = '';
-            document.getElementById('test-description').value = '';
-            document.getElementById('test-start-date').value = '';
-            document.getElementById('test-end-date').value = '';
-            updatePreview();
+            resetForm();
         }
 
         function toggleOptions(questionNumber) {
@@ -320,20 +342,60 @@
             updatePreview();
         }
 
+        function editQuestion(questionNumber) {
+            const text = document.getElementById(`question-text-${questionNumber}`).value;
+            const type = document.getElementById(`question-type-${questionNumber}`).value;
+            const optionsText = document.getElementById(`options-text-${questionNumber}`).value;
+            document.getElementById('edit-question-text').value = text;
+            document.getElementById('edit-question-type').value = type;
+            document.getElementById('edit-options-text').value = optionsText;
+            toggleEditOptions();
+            currentEditingQuestionId = questionNumber;
+            toggleForm('question-edit');
+        }
+
+        function toggleEditOptions() {
+            document.getElementById('edit-options').style.display = 
+                document.getElementById('edit-question-type').value === 'multiple-choice' ? 'block' : 'none';
+        }
+
+        function saveEditedQuestion() {
+            if (currentEditingQuestionId === null) return;
+            const text = document.getElementById('edit-question-text').value;
+            const type = document.getElementById('edit-question-type').value;
+            const optionsText = document.getElementById('edit-options-text').value;
+            const options = optionsText ? optionsText.split(',').map(opt => opt.trim()) : [];
+            document.getElementById(`question-text-${currentEditingQuestionId}`).value = text;
+            document.getElementById(`question-type-${currentEditingQuestionId}`).value = type;
+            document.getElementById(`options-text-${currentEditingQuestionId}`).value = optionsText;
+            toggleOptions(currentEditingQuestionId);
+            previewQuestion(currentEditingQuestionId);
+            alert('Question updated!');
+            toggleForm('test-maker');
+        }
+
+        function cancelEdit() {
+            currentEditingQuestionId = null;
+            toggleForm('test-maker');
+        }
+
         function saveTest() {
             const title = document.getElementById('test-title').value;
             const description = document.getElementById('test-description').value;
             const startDate = document.getElementById('test-start-date').value;
             const endDate = document.getElementById('test-end-date').value;
             if (!title || !description || !startDate || !endDate) return alert('Please fill in all fields.');
-
-            tests[title] = { title, description, startDate, endDate, questions: [] };
+            
+            testCount++;
+            tests[testCount] = { title, description, startDate, endDate, questions: [] };
             for (let i = 1; i <= testCount; i++) {
-                const questionText = document.getElementById(`question-text-${i}`).value || '';
-                const questionType = document.getElementById(`question-type-${i}`).value || '';
-                const optionsText = document.getElementById(`options-text-${i}`).value || '';
+                const text = document.getElementById(`question-text-${i}`).value;
+                const type = document.getElementById(`question-type-${i}`).value;
+                const optionsText = document.getElementById(`options-text-${i}`).value;
                 const options = optionsText ? optionsText.split(',').map(opt => opt.trim()) : [];
-                tests[title].questions.push({ text: questionText, type: questionType, options });
+                if (text) {
+                    tests[testCount].questions.push({ text, type, options });
+                }
             }
             alert('Test saved!');
             resetForm();
@@ -344,38 +406,20 @@
             document.getElementById('test-description').value = '';
             document.getElementById('test-start-date').value = '';
             document.getElementById('test-end-date').value = '';
-            document.getElementById('question-container').innerHTML = '';
-            document.getElementById('preview-content').innerHTML = '';
-            testCount = 0;
+            document.getElementById('question-container').innerHTML = '<h2>Questions</h2>';
+            updatePreview();
         }
 
         function createPool() {
             const title = document.getElementById('pool-title').value;
             const description = document.getElementById('pool-description').value;
-            if (!title || !description) return alert('Please enter pool title and description.');
+            if (!title || !description) return alert('Please fill in all fields.');
             
             poolCount++;
-            const poolId = `pool-${poolCount}`;
-            pools[poolId] = { title, description, questions: [] };
-            const poolContainer = document.getElementById('pool-container');
-            const poolDiv = document.createElement('div');
-            poolDiv.innerHTML = `
-                <h3>${title}</h3>
-                <p>${description}</p>
-                <button onclick="addQuestionToPool('${poolId}')">Add Question to Pool</button>
-            `;
-            poolContainer.appendChild(poolDiv);
-            document.getElementById('pool-title').value = '';
-            document.getElementById('pool-description').value = '';
+            pools[poolCount] = { title, description, questions: [] };
             updatePoolDropdown();
-        }
-
-        function addQuestionToPool(poolId) {
-            const questionText = prompt('Enter the question text:');
-            if (questionText) {
-                pools[poolId].questions.push({ text: questionText });
-                alert('Question added to pool!');
-            }
+            alert('Question pool created!');
+            resetForm();
         }
 
         function updatePoolDropdown() {
@@ -390,7 +434,7 @@
             const container = document.getElementById('question-container');
             const questions = Array.from(container.querySelectorAll('div[id^="question-"]'));
             questions.sort(() => Math.random() - 0.5);
-            container.innerHTML = '';
+            container.innerHTML = '<h2>Questions</h2>';
             questions.forEach(question => container.appendChild(question));
             updatePreview();
         }
