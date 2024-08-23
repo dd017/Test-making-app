@@ -102,6 +102,14 @@
             <textarea id="test-description" rows="4"></textarea>
         </div>
         <div class="form-group">
+            <label for="test-start-date">Start Date:</label>
+            <input type="datetime-local" id="test-start-date">
+        </div>
+        <div class="form-group">
+            <label for="test-end-date">End Date:</label>
+            <input type="datetime-local" id="test-end-date">
+        </div>
+        <div class="form-group">
             <label for="question-pool">Use Question Pool:</label>
             <select id="question-pool" onchange="updatePreview()">
                 <option value="">Select a pool</option>
@@ -136,8 +144,10 @@
     <script>
         let questionCount = 0;
         let poolCount = 0;
+        let testCount = 0;
         let loggedInUser = null;
         const pools = {};
+        const tests = {};
 
         function toggleForm(form) {
             document.getElementById('login-form').style.display = form === 'login' ? 'block' : 'none';
@@ -206,41 +216,45 @@
         function addQuestion() {
             const title = document.getElementById('test-title').value;
             const description = document.getElementById('test-description').value;
+            const startDate = document.getElementById('test-start-date').value;
+            const endDate = document.getElementById('test-end-date').value;
             const poolId = document.getElementById('question-pool').value;
-            if (!title || !description) return alert('Please enter title and description.');
+            if (!title || !description || !startDate || !endDate) return alert('Please fill in all fields.');
             
-            questionCount++;
+            testCount++;
             const container = document.getElementById('question-container');
             const questionDiv = document.createElement('div');
             questionDiv.innerHTML = `
-                <div id="question-${questionCount}">
-                    <h3>Question ${questionCount}</h3>
+                <div id="question-${testCount}">
+                    <h3>Question ${testCount}</h3>
                     <div class="form-group">
-                        <label for="question-text-${questionCount}">Question Text:</label>
-                        <input type="text" id="question-text-${questionCount}" oninput="updatePreview()">
+                        <label for="question-text-${testCount}">Question Text:</label>
+                        <input type="text" id="question-text-${testCount}" oninput="updatePreview()">
                     </div>
                     <div class="form-group">
-                        <label for="question-type-${questionCount}">Question Type:</label>
-                        <select id="question-type-${questionCount}" onchange="toggleOptions(${questionCount})">
+                        <label for="question-type-${testCount}">Question Type:</label>
+                        <select id="question-type-${testCount}" onchange="toggleOptions(${testCount})">
                             <option value="multiple-choice">Multiple Choice</option>
                             <option value="true-false">True/False</option>
                             <option value="short-answer">Short Answer</option>
                         </select>
                     </div>
-                    <div class="form-group" id="options-${questionCount}" style="display: none;">
+                    <div class="form-group" id="options-${testCount}" style="display: none;">
                         <label>Options (comma-separated):</label>
-                        <input type="text" id="options-text-${questionCount}" oninput="updatePreview()">
+                        <input type="text" id="options-text-${testCount}" oninput="updatePreview()">
                     </div>
                     <div class="form-group">
-                        <button onclick="previewQuestion(${questionCount})">Preview</button>
-                        <button onclick="removeQuestion(${questionCount})">Remove</button>
+                        <button onclick="previewQuestion(${testCount})">Preview</button>
+                        <button onclick="removeQuestion(${testCount})">Remove</button>
                     </div>
-                    <div id="question-preview-${questionCount}" class="question-preview"></div>
+                    <div id="question-preview-${testCount}" class="question-preview"></div>
                 </div>
             `;
             container.appendChild(questionDiv);
             document.getElementById('test-title').value = '';
             document.getElementById('test-description').value = '';
+            document.getElementById('test-start-date').value = '';
+            document.getElementById('test-end-date').value = '';
             updatePreview();
         }
 
@@ -255,10 +269,17 @@
             previewContent.innerHTML = '';
             const title = document.getElementById('test-title').value;
             const description = document.getElementById('test-description').value;
-            if (title || description) {
-                previewContent.innerHTML += `<h2>${title}</h2><p>${description}</p>`;
+            const startDate = document.getElementById('test-start-date').value;
+            const endDate = document.getElementById('test-end-date').value;
+            if (title || description || startDate || endDate) {
+                previewContent.innerHTML += `
+                    <h2>${title}</h2>
+                    <p>${description}</p>
+                    <p><strong>Start Date:</strong> ${startDate}</p>
+                    <p><strong>End Date:</strong> ${endDate}</p>
+                `;
             }
-            for (let i = 1; i <= questionCount; i++) {
+            for (let i = 1; i <= testCount; i++) {
                 const questionText = document.getElementById(`question-text-${i}`).value || '';
                 const questionType = document.getElementById(`question-type-${i}`).value || '';
                 const optionsText = document.getElementById(`options-text-${i}`).value || '';
@@ -300,15 +321,32 @@
         }
 
         function saveTest() {
+            const title = document.getElementById('test-title').value;
+            const description = document.getElementById('test-description').value;
+            const startDate = document.getElementById('test-start-date').value;
+            const endDate = document.getElementById('test-end-date').value;
+            if (!title || !description || !startDate || !endDate) return alert('Please fill in all fields.');
+
+            tests[title] = { title, description, startDate, endDate, questions: [] };
+            for (let i = 1; i <= testCount; i++) {
+                const questionText = document.getElementById(`question-text-${i}`).value || '';
+                const questionType = document.getElementById(`question-type-${i}`).value || '';
+                const optionsText = document.getElementById(`options-text-${i}`).value || '';
+                const options = optionsText ? optionsText.split(',').map(opt => opt.trim()) : [];
+                tests[title].questions.push({ text: questionText, type: questionType, options });
+            }
             alert('Test saved!');
+            resetForm();
         }
 
         function resetForm() {
             document.getElementById('test-title').value = '';
             document.getElementById('test-description').value = '';
+            document.getElementById('test-start-date').value = '';
+            document.getElementById('test-end-date').value = '';
             document.getElementById('question-container').innerHTML = '';
             document.getElementById('preview-content').innerHTML = '';
-            questionCount = 0;
+            testCount = 0;
         }
 
         function createPool() {
