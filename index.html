@@ -17,7 +17,10 @@
         .preview div, .report div { margin-bottom: 10px; }
         .edit-form { display: none; }
         .profile-container { margin-top: 20px; }
-        .error, .success { color: red; }
+        .collaborators-list { margin-top: 10px; }
+        .collaborators-list ul { list-style: none; padding: 0; }
+        .collaborators-list li { margin: 5px 0; }
+        .collaborators-list button { margin-left: 10px; }
     </style>
 </head>
 <body>
@@ -72,6 +75,9 @@
             <button onclick="saveTest()">Save Test</button>
             <button onclick="resetForm()">Reset Form</button>
         </div>
+        <div class="form-group">
+            <button onclick="toggleForm('collaborate')">Manage Collaborators</button>
+        </div>
         <div class="preview" id="test-preview"><h2>Test Preview</h2><div id="preview-content"></div></div>
     </div>
 
@@ -106,15 +112,25 @@
         <div class="report" id="report-container"><h2>Reports</h2></div>
     </div>
 
+    <div class="container" id="collaborate-page" style="display: none;">
+        <h1>Manage Collaborators</h1>
+        <div class="form-group"><label for="collaborator-email">Invite Collaborator (by email):</label><input type="email" id="collaborator-email"></div>
+        <div class="form-group"><button onclick="inviteCollaborator()">Invite</button></div>
+        <div class="collaborators-list" id="collaborators-list"><h2>Collaborators</h2></div>
+    </div>
+
     <script>
         let loggedInUser = null;
-        let tests = {};
-        let pools = {};
         let questionCount = 0;
+        let currentEditingQuestionId = null;
+        const tests = {};
+        const pools = {};
+        const collaborators = {};
 
-        function toggleForm(form) {
-            const forms = ['login', 'signup', 'profile', 'test-maker', 'pool-manager', 'question-edit', 'reports'];
-            forms.forEach(f => document.getElementById(`${f}-form`).style.display = f === form ? 'block' : 'none');
+        function toggleForm(formId) {
+            const forms = ['login', 'signup', 'profile', 'test-maker', 'pool-manager', 'question-edit', 'reports', 'collaborate'];
+            forms.forEach(id => document.getElementById(`${id}-form`)?.style.display = 'none');
+            document.getElementById(`${formId}-form`)?.style.display = 'block';
         }
 
         function login() {
@@ -291,38 +307,21 @@
             
             const testId = Date.now();
             tests[testId] = { title, description, startDate, endDate, questions: [] };
-            for (let i = 1; i <= questionCount; i++) {
-                const text = document.getElementById(`question-text-${i}`).value;
-                const type = document.getElementById(`question-type-${i}`).value;
-                const options = (document.getElementById(`options-text-${i}`).value || '').split(',').map(opt => opt.trim()).filter(Boolean);
-                if (text) tests[testId].questions.push({ text, type, options });
-            }
-            alert('Test saved!');
-            updateAnalytics();
-            resetForm();
-        }
-
-        function updateAnalytics() {
-            const reportContainer = document.getElementById('report-container');
-            reportContainer.innerHTML = `<h2>Analytics Report</h2><p>Total Tests Created: ${Object.keys(tests).length}</p>`;
-            Object.values(tests).forEach(test => {
-                reportContainer.innerHTML += `
-                    <div>
-                        <h3>${test.title}</h3>
-                        <p>${test.description}</p>
-                        <p><strong>Start Date:</strong> ${test.startDate}</p>
-                        <p><strong>End Date:</strong> ${test.endDate}</p>
-                        <p><strong>Number of Questions:</strong> ${test.questions.length}</p>
-                    </div>
-                `;
+            Object.keys(pools).forEach(poolId => {
+                const pool = pools[poolId];
+                pools[poolId].questions.forEach(question => {
+                    tests[testId].questions.push(question);
+                });
             });
+            alert('Test saved!');
+            resetForm();
         }
 
         function createPool() {
             const title = document.getElementById('pool-title').value;
             const description = document.getElementById('pool-description').value;
             if (!title || !description) return alert('Please fill in all fields.');
-            
+
             const poolId = Date.now();
             pools[poolId] = { title, description, questions: [] };
             updatePoolDropdown();
@@ -352,11 +351,55 @@
             }
         }
 
+        function updateAnalytics() {
+            const reportContainer = document.getElementById('report-container');
+            reportContainer.innerHTML = `
+                <h2>Test Analytics</h2>
+                <p>Total Tests: ${Object.keys(tests).length}</p>
+                <p>Total Pools: ${Object.keys(pools).length}</p>
+            `;
+        }
+
         function resetForm() {
             document.querySelectorAll('.form-group input, .form-group textarea').forEach(input => input.value = '');
             document.querySelectorAll('.question-preview').forEach(div => div.innerHTML = '');
             questionCount = 0;
             updatePreview();
+        }
+
+        function inviteCollaborator() {
+            const email = document.getElementById('collaborator-email').value;
+            if (email) {
+                const testId = prompt('Enter the test ID to share:');
+                if (testId && tests[testId]) {
+                    if (!collaborators[testId]) collaborators[testId] = [];
+                    collaborators[testId].push(email);
+                    updateCollaboratorsList(testId);
+                    alert('Collaborator invited!');
+                } else {
+                    alert('Invalid test ID.');
+                }
+            }
+        }
+
+        function updateCollaboratorsList(testId) {
+            const list = document.getElementById('collaborators-list');
+            list.innerHTML = '<h2>Collaborators</h2>';
+            if (collaborators[testId]) {
+                collaborators[testId].forEach(email => {
+                    list.innerHTML += `<li>${email} <button onclick="removeCollaborator('${testId}', '${email}')">Remove</button></li>`;
+                });
+            } else {
+                list.innerHTML += '<p>No collaborators.</p>';
+            }
+        }
+
+        function removeCollaborator(testId, email) {
+            if (collaborators[testId]) {
+                collaborators[testId] = collaborators[testId].filter(collab => collab !== email);
+                updateCollaboratorsList(testId);
+                alert('Collaborator removed!');
+            }
         }
     </script>
 </body>
