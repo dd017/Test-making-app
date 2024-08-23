@@ -13,6 +13,7 @@
         .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
         .form-group button { padding: 10px 15px; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
         .form-group button:hover { background: #0056b3; }
+        .form-group button:focus { outline: 2px solid #0056b3; }
         .preview, .report { margin-top: 20px; }
         .preview div, .report div { margin-bottom: 10px; }
         .edit-form { display: none; }
@@ -23,125 +24,243 @@
         .collaborators-list button { margin-left: 10px; }
         .integration { margin-top: 20px; }
         .integration-button { margin-right: 10px; }
+        .hidden { display: none; }
+        .high-contrast { background-color: #000; color: #fff; }
+        .high-contrast .container { background-color: #333; }
     </style>
 </head>
 <body>
+    <div class="container" id="language-selector">
+        <label for="language-select">Select Language:</label>
+        <select id="language-select" onchange="changeLanguage()">
+            <option value="en">English</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+        </select>
+    </div>
+
+    <div class="container" id="accessibility-toggle">
+        <button onclick="toggleHighContrast()">Toggle High Contrast Mode</button>
+    </div>
+
     <div class="container" id="auth-container">
         <button onclick="toggleForm('login')">Login</button>
         <button onclick="toggleForm('signup')">Sign Up</button>
-        <button onclick="toggleForm('profile')" id="profile-button" style="display: none;">Profile</button>
-        <button onclick="toggleForm('reports')" id="reports-button" style="display: none;">Reports</button>
-        <button onclick="logout()" id="logout-button" style="display: none;">Logout</button>
+        <button onclick="toggleForm('profile')" id="profile-button" class="hidden">Profile</button>
+        <button onclick="toggleForm('reports')" id="reports-button" class="hidden">Reports</button>
+        <button onclick="logout()" id="logout-button" class="hidden">Logout</button>
     </div>
 
-    <div class="container" id="login-form" style="display: none;">
-        <h1>Login</h1>
-        <div class="form-group"><label for="login-username">Username:</label><input type="text" id="login-username"></div>
-        <div class="form-group"><label for="login-password">Password:</label><input type="password" id="login-password"></div>
-        <div class="form-group"><button onclick="login()">Login</button></div>
+    <div class="container" id="login-form" class="hidden">
+        <h1 data-translate="login-title">Login</h1>
+        <div class="form-group"><label for="login-username" data-translate="username-label">Username:</label><input type="text" id="login-username"></div>
+        <div class="form-group"><label for="login-password" data-translate="password-label">Password:</label><input type="password" id="login-password"></div>
+        <div class="form-group"><button onclick="login()" data-translate="login-button">Login</button></div>
     </div>
 
-    <div class="container" id="signup-form" style="display: none;">
-        <h1>Sign Up</h1>
-        <div class="form-group"><label for="signup-username">Username:</label><input type="text" id="signup-username"></div>
-        <div class="form-group"><label for="signup-password">Password:</label><input type="password" id="signup-password"></div>
-        <div class="form-group"><button onclick="signup()">Sign Up</button></div>
+    <div class="container" id="signup-form" class="hidden">
+        <h1 data-translate="signup-title">Sign Up</h1>
+        <div class="form-group"><label for="signup-username" data-translate="username-label">Username:</label><input type="text" id="signup-username"></div>
+        <div class="form-group"><label for="signup-password" data-translate="password-label">Password:</label><input type="password" id="signup-password"></div>
+        <div class="form-group"><button onclick="signup()" data-translate="signup-button">Sign Up</button></div>
     </div>
 
-    <div class="container" id="profile-page" style="display: none;">
-        <h1>User Profile</h1>
+    <div class="container" id="profile-page" class="hidden">
+        <h1 data-translate="profile-title">User Profile</h1>
         <div class="profile-container">
-            <h2>Profile Details</h2>
-            <div class="form-group"><label for="profile-username">Username:</label><input type="text" id="profile-username" readonly></div>
-            <div class="form-group"><label for="profile-email">Email:</label><input type="text" id="profile-email" readonly></div>
-            <div class="form-group"><button onclick="toggleEditProfile()">Edit Profile</button></div>
+            <h2 data-translate="profile-details">Profile Details</h2>
+            <div class="form-group"><label for="profile-username" data-translate="username-label">Username:</label><input type="text" id="profile-username" readonly></div>
+            <div class="form-group"><label for="profile-email" data-translate="email-label">Email:</label><input type="text" id="profile-email" readonly></div>
+            <div class="form-group"><button onclick="toggleEditProfile()" data-translate="edit-profile-button">Edit Profile</button></div>
             <div class="form-group edit-form" id="edit-profile-form">
-                <h2>Edit Profile</h2>
-                <div class="form-group"><label for="edit-username">New Username:</label><input type="text" id="edit-username"></div>
-                <div class="form-group"><label for="edit-email">New Email:</label><input type="text" id="edit-email"></div>
-                <div class="form-group"><button onclick="saveProfile()">Save Changes</button></div>
+                <h2 data-translate="edit-profile-title">Edit Profile</h2>
+                <div class="form-group"><label for="edit-username" data-translate="new-username-label">New Username:</label><input type="text" id="edit-username"></div>
+                <div class="form-group"><label for="edit-email" data-translate="new-email-label">New Email:</label><input type="text" id="edit-email"></div>
+                <div class="form-group"><button onclick="saveProfile()" data-translate="save-changes-button">Save Changes</button></div>
             </div>
         </div>
     </div>
 
-    <div class="container" id="test-maker" style="display: none;">
-        <h1>Test Maker</h1>
-        <div class="form-group"><label for="test-title">Test Title:</label><input type="text" id="test-title"></div>
-        <div class="form-group"><label for="test-description">Test Description:</label><textarea id="test-description" rows="4"></textarea></div>
-        <div class="form-group"><label for="test-start-date">Start Date:</label><input type="datetime-local" id="test-start-date"></div>
-        <div class="form-group"><label for="test-end-date">End Date:</label><input type="datetime-local" id="test-end-date"></div>
-        <div class="form-group"><label for="question-pool">Question Pool:</label><select id="question-pool"><option value="">Select a pool</option></select></div>
+    <div class="container" id="test-maker" class="hidden">
+        <h1 data-translate="test-maker-title">Test Maker</h1>
+        <div class="form-group"><label for="test-title" data-translate="test-title-label">Test Title:</label><input type="text" id="test-title"></div>
+        <div class="form-group"><label for="test-description" data-translate="test-description-label">Test Description:</label><textarea id="test-description" rows="4"></textarea></div>
+        <div class="form-group"><label for="test-start-date" data-translate="start-date-label">Start Date:</label><input type="datetime-local" id="test-start-date"></div>
+        <div class="form-group"><label for="test-end-date" data-translate="end-date-label">End Date:</label><input type="datetime-local" id="test-end-date"></div>
+        <div class="form-group"><label for="question-pool" data-translate="question-pool-label">Question Pool:</label><select id="question-pool"><option value="">Select a pool</option></select></div>
         <div class="form-group">
-            <button onclick="addQuestion()">Add Question</button>
-            <button onclick="randomizeQuestions()">Randomize Questions</button>
-            <button onclick="saveTest()">Save Test</button>
-            <button onclick="resetForm()">Reset Form</button>
+            <button onclick="addQuestion()" data-translate="add-question-button">Add Question</button>
+            <button onclick="randomizeQuestions()" data-translate="randomize-questions-button">Randomize Questions</button>
+            <button onclick="saveTest()" data-translate="save-test-button">Save Test</button>
+            <button onclick="resetForm()" data-translate="reset-form-button">Reset Form</button>
         </div>
         <div class="form-group">
-            <button onclick="toggleForm('collaborate')">Manage Collaborators</button>
+            <button onclick="toggleForm('collaborate')" data-translate="manage-collaborators-button">Manage Collaborators</button>
         </div>
-        <div class="preview" id="test-preview"><h2>Test Preview</h2><div id="preview-content"></div></div>
+        <div class="preview" id="test-preview"><h2 data-translate="test-preview-title">Test Preview</h2><div id="preview-content"></div></div>
     </div>
 
-    <div class="container" id="pool-manager" style="display: none;">
-        <h1>Manage Question Pools</h1>
-        <div class="form-group"><label for="pool-title">Pool Title:</label><input type="text" id="pool-title"></div>
-        <div class="form-group"><label for="pool-description">Pool Description:</label><textarea id="pool-description" rows="4"></textarea></div>
-        <div class="form-group"><button onclick="createPool()">Create Pool</button></div>
-        <div class="preview" id="pool-container"><h2>Question Pools</h2></div>
+    <div class="container" id="pool-manager" class="hidden">
+        <h1 data-translate="pool-manager-title">Question Pool Manager</h1>
+        <div class="form-group"><label for="pool-title" data-translate="pool-title-label">Pool Title:</label><input type="text" id="pool-title"></div>
+        <div class="form-group"><label for="pool-description" data-translate="pool-description-label">Pool Description:</label><textarea id="pool-description" rows="4"></textarea></div>
+        <div class="form-group"><button onclick="createPool()" data-translate="create-pool-button">Create Pool</button></div>
     </div>
 
-    <div class="container" id="question-edit" style="display: none;">
-        <h1>Edit Question</h1>
-        <div class="form-group"><label for="edit-question-text">Question Text:</label><input type="text" id="edit-question-text"></div>
-        <div class="form-group">
-            <label for="edit-question-type">Question Type:</label>
-            <select id="edit-question-type" onchange="toggleEditOptions()">
-                <option value="multiple-choice">Multiple Choice</option>
-                <option value="true-false">True/False</option>
-                <option value="short-answer">Short Answer</option>
-            </select>
-        </div>
-        <div class="form-group edit-form" id="edit-options">
-            <label for="edit-options-text">Options (comma-separated):</label>
-            <input type="text" id="edit-options-text">
-        </div>
-        <div class="form-group"><button onclick="saveEditedQuestion()">Save Changes</button><button onclick="cancelEdit()">Cancel</button></div>
-    </div>
-
-    <div class="container" id="reports" style="display: none;">
-        <h1>Analytics and Reports</h1>
+    <div class="container" id="reports" class="hidden">
+        <h1 data-translate="reports-title">Analytics and Reports</h1>
         <div id="report-container" class="report"></div>
     </div>
 
-    <div class="container" id="collaborate" style="display: none;">
-        <h1>Manage Collaborators</h1>
-        <div class="form-group"><label for="collaborator-email">Collaborator Email:</label><input type="text" id="collaborator-email"></div>
-        <div class="form-group"><button onclick="inviteCollaborator()">Invite</button></div>
-        <div class="collaborators-list" id="collaborators-list"><h2>Collaborators</h2></div>
+    <div class="container" id="collaborate" class="hidden">
+        <h1 data-translate="collaborate-title">Manage Collaborators</h1>
+        <div class="form-group"><label for="collaborator-email" data-translate="collaborator-email-label">Collaborator Email:</label><input type="text" id="collaborator-email"></div>
+        <div class="form-group"><button onclick="inviteCollaborator()" data-translate="invite-collaborator-button">Invite</button></div>
+        <div class="collaborators-list" id="collaborators-list"><h2 data-translate="collaborators-list-title">Collaborators</h2></div>
     </div>
 
-    <div class="container" id="lms-integration" style="display: none;">
-        <h1>LMS Integration</h1>
-        <div class="form-group">
-            <button class="integration-button" onclick="connectLMS()">Connect to LMS</button>
-            <button class="integration-button" onclick="uploadTestToLMS()">Upload Test to LMS</button>
+    <div class="container" id="lms-integration" class="hidden">
+        <h1 data-translate="lms-integration-title">LMS Integration</h1>
+        <div class="integration">
+            <button class="integration-button" onclick="connectLMS()" data-translate="connect-lms-button">Connect to LMS</button>
+            <button class="integration-button" onclick="uploadTestToLMS()" data-translate="upload-test-button">Upload Test to LMS</button>
         </div>
         <div id="lms-status"></div>
     </div>
 
     <script>
-        let loggedInUser = null;
-        let questionCount = 0;
-        let currentEditingQuestionId = null;
-        const tests = {};
-        const pools = {};
-        const collaborators = {};
+        function toggleHighContrast() {
+            document.body.classList.toggle('high-contrast');
+        }
+
+        const translations = {
+            en: {
+                'login-title': 'Login',
+                'username-label': 'Username:',
+                'password-label': 'Password:',
+                'login-button': 'Login',
+                'signup-title': 'Sign Up',
+                'signup-button': 'Sign Up',
+                'profile-title': 'User Profile',
+                'profile-details': 'Profile Details',
+                'edit-profile-button': 'Edit Profile',
+                'edit-profile-title': 'Edit Profile',
+                'save-changes-button': 'Save Changes',
+                'test-maker-title': 'Test Maker',
+                'test-title-label': 'Test Title:',
+                'test-description-label': 'Test Description:',
+                'start-date-label': 'Start Date:',
+                'end-date-label': 'End Date:',
+                'question-pool-label': 'Question Pool:',
+                'add-question-button': 'Add Question',
+                'randomize-questions-button': 'Randomize Questions',
+                'save-test-button': 'Save Test',
+                'reset-form-button': 'Reset Form',
+                'manage-collaborators-button': 'Manage Collaborators',
+                'test-preview-title': 'Test Preview',
+                'pool-manager-title': 'Question Pool Manager',
+                'pool-title-label': 'Pool Title:',
+                'pool-description-label': 'Pool Description:',
+                'create-pool-button': 'Create Pool',
+                'reports-title': 'Analytics and Reports',
+                'collaborate-title': 'Manage Collaborators',
+                'collaborator-email-label': 'Collaborator Email:',
+                'invite-collaborator-button': 'Invite',
+                'collaborators-list-title': 'Collaborators',
+                'lms-integration-title': 'LMS Integration',
+                'connect-lms-button': 'Connect to LMS',
+                'upload-test-button': 'Upload Test to LMS'
+            },
+            es: {
+                'login-title': 'Iniciar sesión',
+                'username-label': 'Nombre de usuario:',
+                'password-label': 'Contraseña:',
+                'login-button': 'Iniciar sesión',
+                'signup-title': 'Regístrate',
+                'signup-button': 'Regístrate',
+                'profile-title': 'Perfil de usuario',
+                'profile-details': 'Detalles del perfil',
+                'edit-profile-button': 'Editar perfil',
+                'edit-profile-title': 'Editar perfil',
+                'save-changes-button': 'Guardar cambios',
+                'test-maker-title': 'Creador de pruebas',
+                'test-title-label': 'Título de la prueba:',
+                'test-description-label': 'Descripción de la prueba:',
+                'start-date-label': 'Fecha de inicio:',
+                'end-date-label': 'Fecha de finalización:',
+                'question-pool-label': 'Grupo de preguntas:',
+                'add-question-button': 'Añadir pregunta',
+                'randomize-questions-button': 'Aleatorizar preguntas',
+                'save-test-button': 'Guardar prueba',
+                'reset-form-button': 'Restablecer formulario',
+                'manage-collaborators-button': 'Gestionar colaboradores',
+                'test-preview-title': 'Vista previa de la prueba',
+                'pool-manager-title': 'Administrador de grupos de preguntas',
+                'pool-title-label': 'Título del grupo:',
+                'pool-description-label': 'Descripción del grupo:',
+                'create-pool-button': 'Crear grupo',
+                'reports-title': 'Análisis e informes',
+                'collaborate-title': 'Gestionar colaboradores',
+                'collaborator-email-label': 'Correo electrónico del colaborador:',
+                'invite-collaborator-button': 'Invitar',
+                'collaborators-list-title': 'Colaboradores',
+                'lms-integration-title': 'Integración con LMS',
+                'connect-lms-button': 'Conectar a LMS',
+                'upload-test-button': 'Subir prueba a LMS'
+            },
+            fr: {
+                'login-title': 'Connexion',
+                'username-label': 'Nom d’utilisateur:',
+                'password-label': 'Mot de passe:',
+                'login-button': 'Se connecter',
+                'signup-title': 'S’inscrire',
+                'signup-button': 'S’inscrire',
+                'profile-title': 'Profil utilisateur',
+                'profile-details': 'Détails du profil',
+                'edit-profile-button': 'Modifier le profil',
+                'edit-profile-title': 'Modifier le profil',
+                'save-changes-button': 'Sauvegarder les modifications',
+                'test-maker-title': 'Créateur de test',
+                'test-title-label': 'Titre du test:',
+                'test-description-label': 'Description du test:',
+                'start-date-label': 'Date de début:',
+                'end-date-label': 'Date de fin:',
+                'question-pool-label': 'Pool de questions:',
+                'add-question-button': 'Ajouter une question',
+                'randomize-questions-button': 'Randomiser les questions',
+                'save-test-button': 'Sauvegarder le test',
+                'reset-form-button': 'Réinitialiser le formulaire',
+                'manage-collaborators-button': 'Gérer les collaborateurs',
+                'test-preview-title': 'Aperçu du test',
+                'pool-manager-title': 'Gestion des pools de questions',
+                'pool-title-label': 'Titre du pool:',
+                'pool-description-label': 'Description du pool:',
+                'create-pool-button': 'Créer un pool',
+                'reports-title': 'Analytique et rapports',
+                'collaborate-title': 'Gérer les collaborateurs',
+                'collaborator-email-label': 'Email du collaborateur:',
+                'invite-collaborator-button': 'Inviter',
+                'collaborators-list-title': 'Collaborateurs',
+                'lms-integration-title': 'Intégration LMS',
+                'connect-lms-button': 'Connecter au LMS',
+                'upload-test-button': 'Téléverser le test sur le LMS'
+            }
+        };
+
+        function changeLanguage() {
+            const lang = document.getElementById('language-select').value;
+            const elements = document.querySelectorAll('[data-translate]');
+            elements.forEach(el => {
+                const key = el.getAttribute('data-translate');
+                el.textContent = translations[lang][key] || key;
+            });
+        }
 
         function toggleForm(formId) {
             const forms = ['login', 'signup', 'profile', 'test-maker', 'pool-manager', 'question-edit', 'reports', 'collaborate', 'lms-integration'];
-            forms.forEach(id => document.getElementById(`${id}-form`)?.style.display = 'none');
-            document.getElementById(`${formId}-form`)?.style.display = 'block';
+            forms.forEach(id => document.getElementById(`${id}-form`)?.classList.add('hidden'));
+            document.getElementById(`${formId}-form`)?.classList.remove('hidden');
+            changeLanguage(); // Update language for new forms
         }
 
         function login() {
@@ -149,9 +268,9 @@
             const password = document.getElementById('login-password').value;
             if (username && password) {
                 loggedInUser = { username };
-                document.getElementById('profile-button').style.display = 'inline';
-                document.getElementById('reports-button').style.display = 'inline';
-                document.getElementById('logout-button').style.display = 'inline';
+                document.getElementById('profile-button').classList.remove('hidden');
+                document.getElementById('reports-button').classList.remove('hidden');
+                document.getElementById('logout-button').classList.remove('hidden');
                 toggleForm('test-maker');
             } else {
                 alert('Please enter username and password.');
@@ -162,7 +281,7 @@
             const username = document.getElementById('signup-username').value;
             const password = document.getElementById('signup-password').value;
             if (username && password) {
-                alert('Sign up successful!');
+                alert('Signup successful! You can now log in.');
                 toggleForm('login');
             } else {
                 alert('Please enter username and password.');
@@ -171,141 +290,84 @@
 
         function logout() {
             loggedInUser = null;
-            document.getElementById('profile-button').style.display = 'none';
-            document.getElementById('reports-button').style.display = 'none';
-            document.getElementById('logout-button').style.display = 'none';
+            document.getElementById('profile-button').classList.add('hidden');
+            document.getElementById('reports-button').classList.add('hidden');
+            document.getElementById('logout-button').classList.add('hidden');
             toggleForm('login');
         }
 
-        function showProfile() {
-            if (loggedInUser) {
-                document.getElementById('profile-username').value = loggedInUser.username;
+        function saveProfile() {
+            const username = document.getElementById('edit-username').value;
+            const email = document.getElementById('edit-email').value;
+            if (username && email) {
+                document.getElementById('profile-username').value = username;
+                document.getElementById('profile-email').value = email;
                 toggleForm('profile');
+            } else {
+                alert('Please fill in all fields.');
             }
         }
 
         function toggleEditProfile() {
-            document.getElementById('edit-profile-form').style.display = 'block';
-        }
-
-        function saveProfile() {
-            const newUsername = document.getElementById('edit-username').value;
-            const newEmail = document.getElementById('edit-email').value;
-            if (newUsername) loggedInUser.username = newUsername;
-            if (newEmail) loggedInUser.email = newEmail;
-            alert('Profile updated!');
-            showProfile();
+            document.getElementById('edit-profile-form').classList.toggle('hidden');
         }
 
         function addQuestion() {
-            const title = document.getElementById('test-title').value;
-            const description = document.getElementById('test-description').value;
-            const startDate = document.getElementById('test-start-date').value;
-            const endDate = document.getElementById('test-end-date').value;
-            const poolId = document.getElementById('question-pool').value;
-            if (!title || !description || !startDate || !endDate) return alert('Please fill in all fields.');
-
             questionCount++;
-            const container = document.getElementById('test-preview');
             const questionDiv = document.createElement('div');
             questionDiv.id = `question-${questionCount}`;
             questionDiv.innerHTML = `
                 <h3>Question ${questionCount}</h3>
-                <div class="form-group"><label for="question-text-${questionCount}">Question Text:</label><input type="text" id="question-text-${questionCount}" oninput="updatePreview()"></div>
-                <div class="form-group">
-                    <label for="question-type-${questionCount}">Question Type:</label>
-                    <select id="question-type-${questionCount}" onchange="toggleOptions(${questionCount})">
-                        <option value="multiple-choice">Multiple Choice</option>
-                        <option value="true-false">True/False</option>
-                        <option value="short-answer">Short Answer</option>
-                    </select>
-                </div>
-                <div class="form-group" id="options-${questionCount}" style="display: none;">
-                    <label>Options (comma-separated):</label>
-                    <input type="text" id="options-text-${questionCount}" oninput="updatePreview()">
-                </div>
-                <div class="form-group">
-                    <button onclick="editQuestion(${questionCount})">Edit</button>
-                    <button onclick="removeQuestion(${questionCount})">Remove</button>
-                </div>
-                <div id="question-preview-${questionCount}" class="question-preview"></div>
+                <div class="form-group"><label for="question-text-${questionCount}">Question Text:</label><input type="text" id="question-text-${questionCount}"></div>
+                <div class="form-group"><label for="question-type-${questionCount}">Question Type:</label><select id="question-type-${questionCount}"><option value="text">Text</option><option value="multiple-choice">Multiple Choice</option></select></div>
+                <div class="form-group"><label for="options-text-${questionCount}">Options (comma separated):</label><input type="text" id="options-text-${questionCount}"></div>
+                <button onclick="editQuestion(${questionCount})">Edit</button>
+                <button onclick="removeQuestion(${questionCount})">Remove</button>
             `;
-            container.appendChild(questionDiv);
-            resetForm();
-        }
-
-        function toggleOptions(questionNumber) {
-            document.getElementById(`options-${questionNumber}`).style.display = document.getElementById(`question-type-${questionNumber}`).value === 'multiple-choice' ? 'block' : 'none';
+            document.getElementById('test-preview').appendChild(questionDiv);
             updatePreview();
         }
 
-        function updatePreview() {
-            const previewContent = document.getElementById('preview-content');
-            previewContent.innerHTML = `
-                <h2>${document.getElementById('test-title').value}</h2>
-                <p>${document.getElementById('test-description').value}</p>
-                <p><strong>Start Date:</strong> ${document.getElementById('test-start-date').value}</p>
-                <p><strong>End Date:</strong> ${document.getElementById('test-end-date').value}</p>
-            `;
-            for (let i = 1; i <= questionCount; i++) {
-                const text = document.getElementById(`question-text-${i}`).value || '';
-                const type = document.getElementById(`question-type-${i}`).value || '';
-                const options = (document.getElementById(`options-text-${i}`).value || '').split(',').map(opt => opt.trim()).filter(Boolean);
-                let optionsHtml = type === 'multiple-choice' ? `<ul>${options.map(opt => `<li>${opt}</li>`).join('')}</ul>` : '';
-                previewContent.innerHTML += `
-                    <div>
-                        <p><strong>Question ${i}:</strong> ${text}</p>
-                        <p><strong>Type:</strong> ${type}</p>
-                        ${optionsHtml ? `<p><strong>Options:</strong></p>${optionsHtml}` : ''}
-                    </div>
-                `;
-            }
-        }
-
-        function previewQuestion(questionNumber) {
-            const text = document.getElementById(`question-text-${questionNumber}`).value;
-            const type = document.getElementById(`question-type-${questionNumber}`).value;
-            const options = (document.getElementById(`options-text-${questionNumber}`).value || '').split(',').map(opt => opt.trim()).filter(Boolean);
-            const previewDiv = document.getElementById(`question-preview-${questionNumber}`);
-            let optionsHtml = type === 'multiple-choice' ? `<ul>${options.map(opt => `<li>${opt}</li>`).join('')}</ul>` : '';
-            previewDiv.innerHTML = `
-                <p><strong>Question:</strong> ${text}</p>
-                <p><strong>Type:</strong> ${type}</p>
-                ${optionsHtml ? `<p><strong>Options:</strong></p>${optionsHtml}` : ''}
-            `;
-        }
-
-        function removeQuestion(questionNumber) {
-            document.getElementById(`question-${questionNumber}`).remove();
-            updatePreview();
-        }
-
-        function editQuestion(questionNumber) {
-            document.getElementById('edit-question-text').value = document.getElementById(`question-text-${questionNumber}`).value;
-            document.getElementById('edit-question-type').value = document.getElementById(`question-type-${questionNumber}`).value;
-            document.getElementById('edit-options-text').value = document.getElementById(`options-text-${questionNumber}`).value;
-            toggleEditOptions();
-            currentEditingQuestionId = questionNumber;
+        function editQuestion(id) {
+            const text = document.getElementById(`question-text-${id}`).value;
+            const type = document.getElementById(`question-type-${id}`).value;
+            const options = document.getElementById(`options-text-${id}`).value;
+            document.getElementById('edit-question-text').value = text;
+            document.getElementById('edit-question-type').value = type;
+            document.getElementById('edit-options-text').value = options;
+            currentEditingQuestionId = id;
             toggleForm('question-edit');
         }
 
-        function toggleEditOptions() {
-            document.getElementById('edit-options').style.display = document.getElementById('edit-question-type').value === 'multiple-choice' ? 'block' : 'none';
+        function removeQuestion(id) {
+            document.getElementById(`question-${id}`).remove();
+            updatePreview();
         }
 
-        function saveEditedQuestion() {
-            if (currentEditingQuestionId === null) return;
-            document.getElementById(`question-text-${currentEditingQuestionId}`).value = document.getElementById('edit-question-text').value;
-            document.getElementById(`question-type-${currentEditingQuestionId}`).value = document.getElementById('edit-question-type').value;
-            document.getElementById(`options-text-${currentEditingQuestionId}`).value = document.getElementById('edit-options-text').value;
-            previewQuestion(currentEditingQuestionId);
-            currentEditingQuestionId = null;
-            toggleForm('test-maker');
+        function previewQuestion(id) {
+            const text = document.getElementById(`question-text-${id}`).value;
+            const type = document.getElementById(`question-type-${id}`).value;
+            const options = (document.getElementById(`options-text-${id}`).value || '').split(',').map(opt => opt.trim()).filter(Boolean);
+            const previewDiv = document.getElementById(`preview-question-${id}`);
+            previewDiv.innerHTML = `
+                <h4>${text}</h4>
+                ${type === 'multiple-choice' ? options.map(opt => `<input type="radio" name="q${id}"> ${opt}<br>`).join('') : ''}
+            `;
         }
 
-        function cancelEdit() {
-            currentEditingQuestionId = null;
-            toggleForm('test-maker');
+        function updatePreview() {
+            document.getElementById('preview-content').innerHTML = '';
+            for (let i = 1; i <= questionCount; i++) {
+                const text = document.getElementById(`question-text-${i}`)?.value || '';
+                const type = document.getElementById(`question-type-${i}`)?.value || '';
+                const options = (document.getElementById(`options-text-${i}`)?.value || '').split(',').map(opt => opt.trim()).filter(Boolean);
+                const previewDiv = document.createElement('div');
+                previewDiv.innerHTML = `
+                    <h4>${text}</h4>
+                    ${type === 'multiple-choice' ? options.map(opt => `<input type="radio" name="q${i}"> ${opt}<br>`).join('') : ''}
+                `;
+                document.getElementById('preview-content').appendChild(previewDiv);
+            }
         }
 
         function saveTest() {
@@ -366,7 +428,7 @@
         function updateAnalytics() {
             const reportContainer = document.getElementById('report-container');
             reportContainer.innerHTML = `
-                <h2>Test Analytics</h2>
+                <h2 data-translate="analytics-title">Test Analytics</h2>
                 <p>Total Tests: ${Object.keys(tests).length}</p>
                 <p>Total Pools: ${Object.keys(pools).length}</p>
             `;
@@ -396,13 +458,13 @@
 
         function updateCollaboratorsList(testId) {
             const list = document.getElementById('collaborators-list');
-            list.innerHTML = '<h2>Collaborators</h2>';
+            list.innerHTML = '<h2 data-translate="collaborators-list-title">Collaborators</h2>';
             if (collaborators[testId]) {
                 collaborators[testId].forEach(email => {
-                    list.innerHTML += `<li>${email} <button onclick="removeCollaborator('${testId}', '${email}')">Remove</button></li>`;
+                    list.innerHTML += `<li>${email} <button onclick="removeCollaborator('${testId}', '${email}')" data-translate="remove-collaborator-button">Remove</button></li>`;
                 });
             } else {
-                list.innerHTML += '<p>No collaborators.</p>';
+                list.innerHTML += '<p data-translate="no-collaborators">No collaborators.</p>';
             }
         }
 
@@ -415,22 +477,25 @@
         }
 
         function connectLMS() {
-            document.getElementById('lms-status').innerHTML = 'Connected to LMS!';
+            document.getElementById('lms-status').innerHTML = '<p data-translate="lms-connected">Connected to LMS!</p>';
         }
 
         function uploadTestToLMS() {
             if (loggedInUser) {
                 const testId = prompt('Enter the test ID to upload:');
                 if (testId && tests[testId]) {
-                    // Simulate API call to upload test data to LMS
-                    document.getElementById('lms-status').innerHTML = `Test ${testId} uploaded to LMS!`;
+                    alert('Test uploaded to LMS!');
                 } else {
                     alert('Invalid test ID.');
                 }
-            } else {
-                alert('Please log in first.');
             }
         }
+
+        let loggedInUser = null;
+        let questionCount = 0;
+        const tests = {};
+        const pools = {};
+        const collaborators = {};
     </script>
 </body>
 </html>
