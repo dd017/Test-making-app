@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Test Maker App</title>
+    <title>Test Maker App with Analytics</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
         .container { width: 80%; margin: 20px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -13,12 +13,11 @@
         .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
         .form-group button { padding: 10px 15px; background-color: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
         .form-group button:hover { background-color: #0056b3; }
-        .question-container, .pool-container { margin-top: 20px; }
-        .question-preview { margin-top: 10px; }
-        .test-preview, .question-edit { margin-top: 20px; }
-        .test-preview div, .question-edit div { margin-bottom: 10px; }
-        .test-preview h2, .question-edit h2 { margin-bottom: 10px; }
-        .question-edit input, .question-edit select { margin-bottom: 10px; }
+        .question-container, .pool-container, .report-container { margin-top: 20px; }
+        .question-preview, .test-preview, .report { margin-top: 10px; }
+        .test-preview div, .report div { margin-bottom: 10px; }
+        .test-preview h2, .report h2 { margin-bottom: 10px; }
+        .question-edit input, .report-container input { margin-bottom: 10px; }
         .profile-container { margin-top: 20px; }
         .error { color: red; }
         .success { color: green; }
@@ -29,6 +28,7 @@
         <button onclick="toggleForm('login')">Login</button>
         <button onclick="toggleForm('signup')">Sign Up</button>
         <button onclick="showProfile()" style="display: none;" id="profile-button">Profile</button>
+        <button onclick="showReports()" style="display: none;" id="reports-button">Reports</button>
         <button onclick="logout()" style="display: none;" id="logout-button">Logout</button>
     </div>
 
@@ -62,7 +62,7 @@
         </div>
     </div>
 
-    <div class="container" id="profile-page" style="display: none;">
+        <div id="profile-page" style="display: none;">
         <h1>User Profile</h1>
         <div class="profile-container">
             <h2>Profile Details</h2>
@@ -170,13 +170,17 @@
         </div>
     </div>
 
+    <div class="container" id="reports-page" style="display: none;">
+        <h1>Analytics and Reporting</h1>
+        <div class="report-container" id="report-container"><h2>Reports</h2></div>
+    </div>
+
     <script>
-        let questionCount = 0;
-        let poolCount = 0;
-        let testCount = 0;
         let loggedInUser = null;
-        const pools = {};
-        const tests = {};
+        let testCount = 0;
+        let poolCount = 0;
+        let tests = {};
+        let pools = {};
         let currentEditingQuestionId = null;
 
         function toggleForm(form) {
@@ -186,6 +190,7 @@
             document.getElementById('test-maker').style.display = form === 'test-maker' ? 'block' : 'none';
             document.getElementById('pool-manager').style.display = form === 'pool-manager' ? 'block' : 'none';
             document.getElementById('question-edit').style.display = form === 'question-edit' ? 'block' : 'none';
+            document.getElementById('reports-page').style.display = form === 'reports' ? 'block' : 'none';
         }
 
         function login() {
@@ -194,6 +199,7 @@
             if (username && password) {
                 loggedInUser = { username };
                 document.getElementById('profile-button').style.display = 'inline-block';
+                document.getElementById('reports-button').style.display = 'inline-block';
                 document.getElementById('logout-button').style.display = 'inline-block';
                 toggleForm('test-maker');
             } else {
@@ -215,6 +221,7 @@
         function logout() {
             loggedInUser = null;
             document.getElementById('profile-button').style.display = 'none';
+            document.getElementById('reports-button').style.display = 'none';
             document.getElementById('logout-button').style.display = 'none';
             toggleForm('login');
         }
@@ -360,18 +367,14 @@
         }
 
         function saveEditedQuestion() {
-            if (currentEditingQuestionId === null) return;
-            const text = document.getElementById('edit-question-text').value;
-            const type = document.getElementById('edit-question-type').value;
-            const optionsText = document.getElementById('edit-options-text').value;
-            const options = optionsText ? optionsText.split(',').map(opt => opt.trim()) : [];
-            document.getElementById(`question-text-${currentEditingQuestionId}`).value = text;
-            document.getElementById(`question-type-${currentEditingQuestionId}`).value = type;
-            document.getElementById(`options-text-${currentEditingQuestionId}`).value = optionsText;
-            toggleOptions(currentEditingQuestionId);
-            previewQuestion(currentEditingQuestionId);
-            alert('Question updated!');
-            toggleForm('test-maker');
+            if (currentEditingQuestionId !== null) {
+                document.getElementById(`question-text-${currentEditingQuestionId}`).value = document.getElementById('edit-question-text').value;
+                document.getElementById(`question-type-${currentEditingQuestionId}`).value = document.getElementById('edit-question-type').value;
+                document.getElementById(`options-text-${currentEditingQuestionId}`).value = document.getElementById('edit-options-text').value;
+                previewQuestion(currentEditingQuestionId);
+                alert('Question updated!');
+                toggleForm('test-maker');
+            }
         }
 
         function cancelEdit() {
@@ -398,16 +401,26 @@
                 }
             }
             alert('Test saved!');
+            updateAnalytics();
             resetForm();
         }
 
-        function resetForm() {
-            document.getElementById('test-title').value = '';
-            document.getElementById('test-description').value = '';
-            document.getElementById('test-start-date').value = '';
-            document.getElementById('test-end-date').value = '';
-            document.getElementById('question-container').innerHTML = '<h2>Questions</h2>';
-            updatePreview();
+        function updateAnalytics() {
+            const reportContainer = document.getElementById('report-container');
+            reportContainer.innerHTML = '<h2>Analytics Report</h2>';
+            const testCounts = Object.keys(tests).length;
+            reportContainer.innerHTML += `<p>Total Tests Created: ${testCounts}</p>`;
+            for (const [testId, test] of Object.entries(tests)) {
+                reportContainer.innerHTML += `
+                    <div>
+                        <h3>${test.title}</h3>
+                        <p>${test.description}</p>
+                        <p><strong>Start Date:</strong> ${test.startDate}</p>
+                        <p><strong>End Date:</strong> ${test.endDate}</p>
+                        <p><strong>Number of Questions:</strong> ${test.questions.length}</p>
+                    </div>
+                `;
+            }
         }
 
         function createPool() {
@@ -437,6 +450,13 @@
             container.innerHTML = '<h2>Questions</h2>';
             questions.forEach(question => container.appendChild(question));
             updatePreview();
+        }
+
+        function showReports() {
+            if (loggedInUser) {
+                updateAnalytics();
+                toggleForm('reports-page');
+            }
         }
     </script>
 </body>
