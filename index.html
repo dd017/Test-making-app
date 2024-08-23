@@ -152,6 +152,20 @@
     </div>
 
     <script>
+        const ws = new WebSocket('wss://your-websocket-server-url'); // Replace with your WebSocket server URL
+
+        ws.onopen = () => console.log('Connected to WebSocket server');
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'update-question') {
+                const question = document.getElementById(`question-${data.id}`);
+                if (question) {
+                    question.innerHTML = data.html;
+                }
+            }
+        };
+        ws.onclose = () => console.log('Disconnected from WebSocket server');
+
         function showNotification(type, message) {
             const notification = document.getElementById(`${type}-notification`);
             notification.textContent = message;
@@ -262,32 +276,55 @@
             showNotification('success', 'Question added successfully.');
         }
 
-        function editQuestion(id) {}
+        function editQuestion(id) {
+            const question = document.getElementById(`question-${id}`);
+            const html = `
+                <h3>Question ${id}</h3>
+                <div class="form-group"><label for="question-text-${id}">Question Text:</label><input type="text" id="question-text-${id}" required></div>
+                <div class="form-group"><label for="question-type-${id}">Question Type:</label><select id="question-type-${id}" required><option value="text">Text</option><option value="multiple-choice">Multiple Choice</option></select></div>
+                <button onclick="editQuestion(${id})">Edit</button>
+                <button onclick="removeQuestion(${id})">Remove</button>
+                <button onclick="previewQuestion(${id})">Preview</button>
+            `;
+            ws.send(JSON.stringify({ type: 'update-question', id, html }));
+        }
+
         function removeQuestion(id) {
             document.getElementById(`question-${id}`).remove();
             showNotification('info', `Question ${id} removed.`);
         }
+
         function previewQuestion(id) {}
+
         function saveTest() {
             showNotification('success', 'Test saved successfully.');
         }
+
         function resetForm() {
             document.getElementById('test-maker-form').reset();
             showNotification('info', 'Form reset.');
         }
+
         function createPool() {}
+
         function randomizeQuestions() {}
+
         function showReports() {}
+
         function updateAnalytics() {}
+
         function inviteCollaborator() {
             showNotification('success', 'Collaborator invited.');
         }
+
         function updateCollaboratorsList(testId) {}
+
         function removeCollaborator(testId, email) {
             showNotification('info', `Removed collaborator: ${email}`);
         }
 
         function connectLMS() {}
+
         function uploadTestToLMS() {
             const testId = prompt('Enter test ID:');
             if (testId && tests[testId]) {
