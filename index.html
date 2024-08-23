@@ -46,13 +46,13 @@
         .form-group button:hover {
             background-color: #0056b3;
         }
-        .question-container {
+        .question-container, .pool-container {
             margin-top: 20px;
         }
-        .question-container h2 {
+        .question-container h2, .pool-container h2 {
             margin-bottom: 10px;
         }
-        .question-container div {
+        .question-container div, .pool-container div {
             margin-bottom: 10px;
         }
         .question-preview {
@@ -79,6 +79,7 @@
     </style>
 </head>
 <body>
+    <!-- Navigation Bar -->
     <div class="container">
         <div class="form-group">
             <button onclick="showLogin()">Login</button>
@@ -152,7 +153,6 @@
 
     <div class="container" id="test-maker" style="display: none;">
         <h1>Test Maker</h1>
-        <!-- Create Test Form -->
         <div class="form-group">
             <label for="test-title">Test Title:</label>
             <input type="text" id="test-title" placeholder="Enter test title">
@@ -162,7 +162,14 @@
             <textarea id="test-description" rows="4" placeholder="Enter test description"></textarea>
         </div>
         <div class="form-group">
+            <label for="question-pool">Use Question Pool:</label>
+            <select id="question-pool" onchange="updatePreview()">
+                <option value="">Select a pool</option>
+            </select>
+        </div>
+        <div class="form-group">
             <button onclick="addQuestion()">Add Question</button>
+            <button onclick="randomizeQuestions()">Randomize Questions</button>
             <button onclick="saveTest()">Save Test</button>
             <button onclick="resetForm()">Reset Form</button>
         </div>
@@ -177,15 +184,36 @@
         </div>
     </div>
 
+    <div class="container" id="pool-manager" style="display: none;">
+        <h1>Manage Question Pools</h1>
+        <div class="form-group">
+            <label for="pool-title">Pool Title:</label>
+            <input type="text" id="pool-title" placeholder="Enter pool title">
+        </div>
+        <div class="form-group">
+            <label for="pool-description">Pool Description:</label>
+            <textarea id="pool-description" rows="4" placeholder="Enter pool description"></textarea>
+        </div>
+        <div class="form-group">
+            <button onclick="createPool()">Create Pool</button>
+        </div>
+        <div class="pool-container" id="pool-container">
+            <h2>Question Pools</h2>
+        </div>
+    </div>
+
     <script>
         let questionCount = 0;
+        let poolCount = 0;
         let loggedInUser = null;
+        let pools = {}; // To store question pools
 
         function showLogin() {
             document.getElementById('login-form').style.display = 'block';
             document.getElementById('signup-form').style.display = 'none';
             document.getElementById('profile-page').style.display = 'none';
             document.getElementById('test-maker').style.display = 'none';
+            document.getElementById('pool-manager').style.display = 'none';
         }
 
         function showSignup() {
@@ -193,6 +221,7 @@
             document.getElementById('signup-form').style.display = 'block';
             document.getElementById('profile-page').style.display = 'none';
             document.getElementById('test-maker').style.display = 'none';
+            document.getElementById('pool-manager').style.display = 'none';
         }
 
         function showProfile() {
@@ -200,6 +229,7 @@
             document.getElementById('signup-form').style.display = 'none';
             document.getElementById('profile-page').style.display = 'block';
             document.getElementById('test-maker').style.display = 'none';
+            document.getElementById('pool-manager').style.display = 'none';
 
             document.getElementById('profile-username').value = loggedInUser ? loggedInUser.username : '';
             document.getElementById('profile-email').value = loggedInUser ? loggedInUser.email : '';
@@ -210,6 +240,22 @@
             document.getElementById('signup-form').style.display = 'none';
             document.getElementById('profile-page').style.display = 'none';
             document.getElementById('test-maker').style.display = 'block';
+            document.getElementById('pool-manager').style.display = 'none';
+
+            const poolDropdown = document.getElementById('question-pool');
+            poolDropdown.innerHTML = '<option value="">Select a pool</option>';
+            for (const poolId in pools) {
+                const pool = pools[poolId];
+                poolDropdown.innerHTML += `<option value="${poolId}">${pool.title}</option>`;
+            }
+        }
+
+        function showPoolManager() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('signup-form').style.display = 'none';
+            document.getElementById('profile-page').style.display = 'none';
+            document.getElementById('test-maker').style.display = 'none';
+            document.getElementById('pool-manager').style.display = 'block';
         }
 
         function login() {
@@ -260,6 +306,8 @@
         function addQuestion() {
             const title = document.getElementById('test-title').value;
             const description = document.getElementById('test-description').value;
+            const poolId = document.getElementById('question-pool').value;
+
             if (!title || !description) {
                 alert('Please enter the test title and description.');
                 return;
@@ -378,6 +426,63 @@
             document.getElementById('question-container').innerHTML = '';
             document.getElementById('preview-content').innerHTML = '';
             questionCount = 0;
+        }
+
+        function createPool() {
+            const title = document.getElementById('pool-title').value;
+            const description = document.getElementById('pool-description').value;
+
+            if (!title || !description) {
+                alert('Please enter the pool title and description.');
+                return;
+            }
+
+            poolCount++;
+            const poolId = `pool-${poolCount}`;
+            pools[poolId] = { title, description, questions: [] };
+
+            const poolContainer = document.getElementById('pool-container');
+            const poolDiv = document.createElement('div');
+            poolDiv.setAttribute('id', poolId);
+            poolDiv.innerHTML = `
+                <h3>${title}</h3>
+                <p>${description}</p>
+                <div class="form-group">
+                    <button onclick="addQuestionToPool('${poolId}')">Add Question to Pool</button>
+                </div>
+            `;
+            poolContainer.appendChild(poolDiv);
+
+            document.getElementById('pool-title').value = '';
+            document.getElementById('pool-description').value = '';
+
+            updatePoolDropdown();
+        }
+
+        function addQuestionToPool(poolId) {
+            const questionText = prompt('Enter the question text:');
+            if (questionText) {
+                pools[poolId].questions.push({ text: questionText });
+                alert('Question added to pool!');
+            }
+        }
+
+        function updatePoolDropdown() {
+            const poolDropdown = document.getElementById('question-pool');
+            poolDropdown.innerHTML = '<option value="">Select a pool</option>';
+            for (const poolId in pools) {
+                const pool = pools[poolId];
+                poolDropdown.innerHTML += `<option value="${poolId}">${pool.title}</option>`;
+            }
+        }
+
+        function randomizeQuestions() {
+            const container = document.getElementById('question-container');
+            const questions = Array.from(container.querySelectorAll('div[id^="question-"]'));
+            questions.sort(() => Math.random() - 0.5); 
+            container.innerHTML = '';
+            questions.forEach(question => container.appendChild(question));
+            updatePreview();
         }
     </script>
 </body>
