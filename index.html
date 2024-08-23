@@ -5,99 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Maker App</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        .container {
-            width: 80%;
-            margin: 20px auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            text-align: center;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .form-group button {
-            padding: 10px 15px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .form-group button:hover {
-            background-color: #0056b3;
-        }
-        .question-container, .pool-container {
-            margin-top: 20px;
-        }
-        .question-container h2, .pool-container h2 {
-            margin-bottom: 10px;
-        }
-        .question-container div, .pool-container div {
-            margin-bottom: 10px;
-        }
-        .question-preview {
-            margin-top: 10px;
-        }
-        .question-preview button {
-            background-color: #dc3545;
-        }
-        .question-preview button:hover {
-            background-color: #c82333;
-        }
-        .test-preview {
-            margin-top: 20px;
-        }
-        .test-preview h2 {
-            margin-bottom: 10px;
-        }
-        .profile-container {
-            margin-top: 20px;
-        }
-        .profile-container h2 {
-            margin-bottom: 10px;
-        }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { width: 80%; margin: 20px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .form-group button { padding: 10px 15px; background-color: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        .form-group button:hover { background-color: #0056b3; }
+        .question-container, .pool-container { margin-top: 20px; }
+        .question-preview { margin-top: 10px; }
+        .question-preview button { background-color: #dc3545; }
+        .question-preview button:hover { background-color: #c82333; }
+        .test-preview { margin-top: 20px; }
+        .profile-container { margin-top: 20px; }
     </style>
 </head>
 <body>
-    <!-- Navigation Bar -->
-    <div class="container">
-        <div class="form-group">
-            <button onclick="showLogin()">Login</button>
-            <button onclick="showSignup()">Sign Up</button>
-            <button onclick="showProfile()" style="display: none;" id="profile-button">Profile</button>
-            <button onclick="logout()" style="display: none;" id="logout-button">Logout</button>
-        </div>
+    <div class="container" id="auth-container">
+        <button onclick="toggleForm('login')">Login</button>
+        <button onclick="toggleForm('signup')">Sign Up</button>
+        <button onclick="showProfile()" style="display: none;" id="profile-button">Profile</button>
+        <button onclick="logout()" style="display: none;" id="logout-button">Logout</button>
     </div>
 
     <div class="container" id="login-form" style="display: none;">
         <h1>Login</h1>
         <div class="form-group">
             <label for="login-username">Username:</label>
-            <input type="text" id="login-username" placeholder="Enter your username">
+            <input type="text" id="login-username">
         </div>
         <div class="form-group">
             <label for="login-password">Password:</label>
-            <input type="password" id="login-password" placeholder="Enter your password">
+            <input type="password" id="login-password">
         </div>
         <div class="form-group">
             <button onclick="login()">Login</button>
@@ -108,11 +48,11 @@
         <h1>Sign Up</h1>
         <div class="form-group">
             <label for="signup-username">Username:</label>
-            <input type="text" id="signup-username" placeholder="Enter your username">
+            <input type="text" id="signup-username">
         </div>
         <div class="form-group">
             <label for="signup-password">Password:</label>
-            <input type="password" id="signup-password" placeholder="Enter your password">
+            <input type="password" id="signup-password">
         </div>
         <div class="form-group">
             <button onclick="signup()">Sign Up</button>
@@ -132,7 +72,7 @@
                 <input type="text" id="profile-email" readonly>
             </div>
             <div class="form-group">
-                <button onclick="editProfile()">Edit Profile</button>
+                <button onclick="toggleEditProfile()">Edit Profile</button>
             </div>
             <div class="form-group" id="edit-profile-form" style="display: none;">
                 <h2>Edit Profile</h2>
@@ -155,11 +95,11 @@
         <h1>Test Maker</h1>
         <div class="form-group">
             <label for="test-title">Test Title:</label>
-            <input type="text" id="test-title" placeholder="Enter test title">
+            <input type="text" id="test-title">
         </div>
         <div class="form-group">
             <label for="test-description">Test Description:</label>
-            <textarea id="test-description" rows="4" placeholder="Enter test description"></textarea>
+            <textarea id="test-description" rows="4"></textarea>
         </div>
         <div class="form-group">
             <label for="question-pool">Use Question Pool:</label>
@@ -173,52 +113,35 @@
             <button onclick="saveTest()">Save Test</button>
             <button onclick="resetForm()">Reset Form</button>
         </div>
-
-        <div class="question-container" id="question-container">
-            <h2>Questions</h2>
-        </div>
-
-        <div class="test-preview" id="test-preview">
-            <h2>Test Preview</h2>
-            <div id="preview-content"></div>
-        </div>
+        <div class="question-container" id="question-container"><h2>Questions</h2></div>
+        <div class="test-preview" id="test-preview"><h2>Test Preview</h2><div id="preview-content"></div></div>
     </div>
 
     <div class="container" id="pool-manager" style="display: none;">
         <h1>Manage Question Pools</h1>
         <div class="form-group">
             <label for="pool-title">Pool Title:</label>
-            <input type="text" id="pool-title" placeholder="Enter pool title">
+            <input type="text" id="pool-title">
         </div>
         <div class="form-group">
             <label for="pool-description">Pool Description:</label>
-            <textarea id="pool-description" rows="4" placeholder="Enter pool description"></textarea>
+            <textarea id="pool-description" rows="4"></textarea>
         </div>
         <div class="form-group">
             <button onclick="createPool()">Create Pool</button>
         </div>
-        <div class="pool-container" id="pool-container">
-            <h2>Question Pools</h2>
-        </div>
+        <div class="pool-container" id="pool-container"><h2>Question Pools</h2></div>
     </div>
 
     <script>
         let questionCount = 0;
         let poolCount = 0;
         let loggedInUser = null;
-        let pools = {}; // To store question pools
+        const pools = {};
 
-        function showLogin() {
-            document.getElementById('login-form').style.display = 'block';
-            document.getElementById('signup-form').style.display = 'none';
-            document.getElementById('profile-page').style.display = 'none';
-            document.getElementById('test-maker').style.display = 'none';
-            document.getElementById('pool-manager').style.display = 'none';
-        }
-
-        function showSignup() {
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('signup-form').style.display = 'block';
+        function toggleForm(form) {
+            document.getElementById('login-form').style.display = form === 'login' ? 'block' : 'none';
+            document.getElementById('signup-form').style.display = form === 'signup' ? 'block' : 'none';
             document.getElementById('profile-page').style.display = 'none';
             document.getElementById('test-maker').style.display = 'none';
             document.getElementById('pool-manager').style.display = 'none';
@@ -230,32 +153,13 @@
             document.getElementById('profile-page').style.display = 'block';
             document.getElementById('test-maker').style.display = 'none';
             document.getElementById('pool-manager').style.display = 'none';
-
             document.getElementById('profile-username').value = loggedInUser ? loggedInUser.username : '';
             document.getElementById('profile-email').value = loggedInUser ? loggedInUser.email : '';
         }
 
-        function showTestMaker() {
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('signup-form').style.display = 'none';
-            document.getElementById('profile-page').style.display = 'none';
-            document.getElementById('test-maker').style.display = 'block';
-            document.getElementById('pool-manager').style.display = 'none';
-
-            const poolDropdown = document.getElementById('question-pool');
-            poolDropdown.innerHTML = '<option value="">Select a pool</option>';
-            for (const poolId in pools) {
-                const pool = pools[poolId];
-                poolDropdown.innerHTML += `<option value="${poolId}">${pool.title}</option>`;
-            }
-        }
-
-        function showPoolManager() {
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('signup-form').style.display = 'none';
-            document.getElementById('profile-page').style.display = 'none';
-            document.getElementById('test-maker').style.display = 'none';
-            document.getElementById('pool-manager').style.display = 'block';
+        function toggleEditProfile() {
+            document.getElementById('edit-profile-form').style.display = 
+                document.getElementById('edit-profile-form').style.display === 'none' ? 'block' : 'none';
         }
 
         function login() {
@@ -266,7 +170,7 @@
                 alert('Login successful!');
                 document.getElementById('profile-button').style.display = 'inline-block';
                 document.getElementById('logout-button').style.display = 'inline-block';
-                showTestMaker();
+                toggleForm('test-maker');
             } else {
                 alert('Please enter username and password.');
             }
@@ -276,8 +180,8 @@
             const username = document.getElementById('signup-username').value;
             const password = document.getElementById('signup-password').value;
             if (username && password) {
-                alert('Sign up successful! You can now log in.');
-                showLogin();
+                alert('Sign up successful!');
+                toggleForm('login');
             } else {
                 alert('Please enter username and password.');
             }
@@ -287,11 +191,7 @@
             loggedInUser = null;
             document.getElementById('profile-button').style.display = 'none';
             document.getElementById('logout-button').style.display = 'none';
-            showLogin();
-        }
-
-        function editProfile() {
-            document.getElementById('edit-profile-form').style.display = 'block';
+            toggleForm('login');
         }
 
         function saveProfile() {
@@ -299,7 +199,7 @@
             const newEmail = document.getElementById('edit-email').value;
             if (newUsername) loggedInUser.username = newUsername;
             if (newEmail) loggedInUser.email = newEmail;
-            alert('Profile updated successfully!');
+            alert('Profile updated!');
             showProfile();
         }
 
@@ -307,80 +207,66 @@
             const title = document.getElementById('test-title').value;
             const description = document.getElementById('test-description').value;
             const poolId = document.getElementById('question-pool').value;
-
-            if (!title || !description) {
-                alert('Please enter the test title and description.');
-                return;
-            }
-
+            if (!title || !description) return alert('Please enter title and description.');
+            
             questionCount++;
             const container = document.getElementById('question-container');
             const questionDiv = document.createElement('div');
-            questionDiv.setAttribute('id', `question-${questionCount}`);
             questionDiv.innerHTML = `
-                <h3>Question ${questionCount}</h3>
-                <div class="form-group">
-                    <label for="question-text-${questionCount}">Question Text:</label>
-                    <input type="text" id="question-text-${questionCount}" placeholder="Enter question text" oninput="updatePreview()">
+                <div id="question-${questionCount}">
+                    <h3>Question ${questionCount}</h3>
+                    <div class="form-group">
+                        <label for="question-text-${questionCount}">Question Text:</label>
+                        <input type="text" id="question-text-${questionCount}" oninput="updatePreview()">
+                    </div>
+                    <div class="form-group">
+                        <label for="question-type-${questionCount}">Question Type:</label>
+                        <select id="question-type-${questionCount}" onchange="toggleOptions(${questionCount})">
+                            <option value="multiple-choice">Multiple Choice</option>
+                            <option value="true-false">True/False</option>
+                            <option value="short-answer">Short Answer</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="options-${questionCount}" style="display: none;">
+                        <label>Options (comma-separated):</label>
+                        <input type="text" id="options-text-${questionCount}" oninput="updatePreview()">
+                    </div>
+                    <div class="form-group">
+                        <button onclick="previewQuestion(${questionCount})">Preview</button>
+                        <button onclick="removeQuestion(${questionCount})">Remove</button>
+                    </div>
+                    <div id="question-preview-${questionCount}" class="question-preview"></div>
                 </div>
-                <div class="form-group">
-                    <label for="question-type-${questionCount}">Question Type:</label>
-                    <select id="question-type-${questionCount}" onchange="toggleOptions(${questionCount})" oninput="updatePreview()">
-                        <option value="multiple-choice">Multiple Choice</option>
-                        <option value="true-false">True/False</option>
-                        <option value="short-answer">Short Answer</option>
-                    </select>
-                </div>
-                <div class="form-group" id="options-${questionCount}" style="display: none;">
-                    <label>Options (comma-separated):</label>
-                    <input type="text" id="options-text-${questionCount}" placeholder="Enter options" oninput="updatePreview()">
-                </div>
-                <div class="form-group">
-                    <button onclick="previewQuestion(${questionCount})">Preview Question</button>
-                    <button onclick="removeQuestion(${questionCount})">Remove Question</button>
-                </div>
-                <div id="question-preview-${questionCount}" class="question-preview"></div>
             `;
             container.appendChild(questionDiv);
-
             document.getElementById('test-title').value = '';
             document.getElementById('test-description').value = '';
-
             updatePreview();
         }
 
         function toggleOptions(questionNumber) {
-            const type = document.getElementById(`question-type-${questionNumber}`).value;
-            const optionsDiv = document.getElementById(`options-${questionNumber}`);
-            if (type === 'multiple-choice') {
-                optionsDiv.style.display = 'block';
-            } else {
-                optionsDiv.style.display = 'none';
-            }
+            document.getElementById(`options-${questionNumber}`).style.display = 
+                document.getElementById(`question-type-${questionNumber}`).value === 'multiple-choice' ? 'block' : 'none';
             updatePreview();
         }
 
         function updatePreview() {
             const previewContent = document.getElementById('preview-content');
             previewContent.innerHTML = '';
-
             const title = document.getElementById('test-title').value;
             const description = document.getElementById('test-description').value;
             if (title || description) {
                 previewContent.innerHTML += `<h2>${title}</h2><p>${description}</p>`;
             }
-
             for (let i = 1; i <= questionCount; i++) {
-                const questionText = document.getElementById(`question-text-${i}`)?.value || '';
-                const questionType = document.getElementById(`question-type-${i}`)?.value || '';
-                const optionsText = document.getElementById(`options-text-${i}`)?.value || '';
+                const questionText = document.getElementById(`question-text-${i}`).value || '';
+                const questionType = document.getElementById(`question-type-${i}`).value || '';
+                const optionsText = document.getElementById(`options-text-${i}`).value || '';
                 const options = optionsText ? optionsText.split(',').map(opt => opt.trim()) : [];
-
                 let optionsHtml = '';
                 if (questionType === 'multiple-choice' && options.length > 0) {
                     optionsHtml = `<ul>${options.map(opt => `<li>${opt}</li>`).join('')}</ul>`;
                 }
-
                 previewContent.innerHTML += `
                     <div>
                         <p><strong>Question ${i}:</strong> ${questionText}</p>
@@ -397,12 +283,10 @@
             const optionsText = document.getElementById(`options-text-${questionNumber}`).value;
             const options = optionsText ? optionsText.split(',').map(opt => opt.trim()) : [];
             const previewDiv = document.getElementById(`question-preview-${questionNumber}`);
-
             let optionsHtml = '';
             if (type === 'multiple-choice' && options.length > 0) {
                 optionsHtml = `<ul>${options.map(opt => `<li>${opt}</li>`).join('')}</ul>`;
             }
-
             previewDiv.innerHTML = `
                 <p><strong>Question:</strong> ${text}</p>
                 <p><strong>Type:</strong> ${type}</p>
@@ -411,8 +295,7 @@
         }
 
         function removeQuestion(questionNumber) {
-            const questionDiv = document.getElementById(`question-${questionNumber}`);
-            questionDiv.remove();
+            document.getElementById(`question-${questionNumber}`).remove();
             updatePreview();
         }
 
@@ -431,31 +314,21 @@
         function createPool() {
             const title = document.getElementById('pool-title').value;
             const description = document.getElementById('pool-description').value;
-
-            if (!title || !description) {
-                alert('Please enter the pool title and description.');
-                return;
-            }
-
+            if (!title || !description) return alert('Please enter pool title and description.');
+            
             poolCount++;
             const poolId = `pool-${poolCount}`;
             pools[poolId] = { title, description, questions: [] };
-
             const poolContainer = document.getElementById('pool-container');
             const poolDiv = document.createElement('div');
-            poolDiv.setAttribute('id', poolId);
             poolDiv.innerHTML = `
                 <h3>${title}</h3>
                 <p>${description}</p>
-                <div class="form-group">
-                    <button onclick="addQuestionToPool('${poolId}')">Add Question to Pool</button>
-                </div>
+                <button onclick="addQuestionToPool('${poolId}')">Add Question to Pool</button>
             `;
             poolContainer.appendChild(poolDiv);
-
             document.getElementById('pool-title').value = '';
             document.getElementById('pool-description').value = '';
-
             updatePoolDropdown();
         }
 
@@ -471,15 +344,14 @@
             const poolDropdown = document.getElementById('question-pool');
             poolDropdown.innerHTML = '<option value="">Select a pool</option>';
             for (const poolId in pools) {
-                const pool = pools[poolId];
-                poolDropdown.innerHTML += `<option value="${poolId}">${pool.title}</option>`;
+                poolDropdown.innerHTML += `<option value="${poolId}">${pools[poolId].title}</option>`;
             }
         }
 
         function randomizeQuestions() {
             const container = document.getElementById('question-container');
             const questions = Array.from(container.querySelectorAll('div[id^="question-"]'));
-            questions.sort(() => Math.random() - 0.5); 
+            questions.sort(() => Math.random() - 0.5);
             container.innerHTML = '';
             questions.forEach(question => container.appendChild(question));
             updatePreview();
