@@ -8,48 +8,74 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            color: #333;
+            background-color: #f9f9f9;
         }
         .hidden {
             display: none;
         }
-        #feedback-form, #question-generation, #version-history, #version-details, #adaptive-testing, #gamification, #collaboration, #analytics-reporting {
+        #test-maker, #feedback-form, #question-generation, #adaptive-testing, #collaboration, #analytics-reporting, #version-history, #version-details {
             margin-top: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         button {
             margin: 5px;
-            padding: 10px;
+            padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:focus {
+            outline: 2px solid #0056b3;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
         .version-list-item {
             cursor: pointer;
             margin: 5px 0;
             padding: 10px;
             border: 1px solid #ddd;
-            border-radius: 5px;
+            border-radius: 4px;
+            background-color: #fafafa;
         }
         .version-list-item:hover {
             background-color: #f0f0f0;
         }
-        #score, #achievements, #collaborators-list, #analytics-details {
-            margin-top: 10px;
-        }
-        #analytics-details {
-            margin-top: 20px;
+        @media (max-width: 600px) {
+            button {
+                width: 100%;
+            }
+            input, textarea {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="test-maker">
-        <h1>Test Maker</h1>
-        <form id="test-form">
+    <div id="test-maker" role="region" aria-labelledby="test-maker-heading">
+        <h1 id="test-maker-heading">Test Maker</h1>
+        <form id="test-form" aria-labelledby="test-maker-heading">
             <div>
                 <label for="test-title">Test Title:</label>
-                <input type="text" id="test-title" required>
+                <input type="text" id="test-title" aria-required="true" required>
             </div>
             <div>
                 <label for="test-description">Description:</label>
-                <textarea id="test-description" rows="4" required></textarea>
+                <textarea id="test-description" rows="4" aria-required="true" required></textarea>
             </div>
             <div>
                 <button type="button" onclick="saveTest()">Save Test</button>
@@ -58,31 +84,31 @@
         </form>
     </div>
 
-    <div id="feedback-form" class="hidden">
-        <h2>Provide Feedback</h2>
+    <div id="feedback-form" class="hidden" role="region" aria-labelledby="feedback-form-heading">
+        <h2 id="feedback-form-heading">Provide Feedback</h2>
         <form>
             <div>
                 <label for="feedback-test-id">Test ID:</label>
-                <input type="text" id="feedback-test-id" required>
+                <input type="text" id="feedback-test-id" aria-required="true" required>
             </div>
             <div>
                 <label for="feedback-question-id">Question ID:</label>
-                <input type="text" id="feedback-question-id" required>
+                <input type="text" id="feedback-question-id" aria-required="true" required>
             </div>
             <div>
                 <label for="feedback-comments">Comments:</label>
-                <textarea id="feedback-comments" rows="4" required></textarea>
+                <textarea id="feedback-comments" rows="4" aria-required="true" required></textarea>
             </div>
             <button type="button" onclick="submitFeedback()">Submit Feedback</button>
         </form>
     </div>
 
-    <div id="question-generation">
-        <h2>Generate Questions</h2>
+    <div id="question-generation" role="region" aria-labelledby="question-generation-heading">
+        <h2 id="question-generation-heading">Generate Questions</h2>
         <form>
             <div>
                 <label for="topic">Topic:</label>
-                <input type="text" id="topic" required>
+                <input type="text" id="topic" aria-required="true" required>
             </div>
             <div>
                 <button type="button" onclick="generateQuestions()">Generate Questions</button>
@@ -91,58 +117,58 @@
         <div id="generated-questions"></div>
     </div>
 
-    <div id="adaptive-testing" class="hidden">
-        <h2>Adaptive Testing</h2>
+    <div id="adaptive-testing" class="hidden" role="region" aria-labelledby="adaptive-testing-heading">
+        <h2 id="adaptive-testing-heading">Adaptive Testing</h2>
         <button type="button" onclick="startAdaptiveTest()">Start Test</button>
-        <div id="question-section" class="hidden">
-            <div id="question-text"></div>
-            <input type="text" id="answer-input" placeholder="Your answer">
+        <div id="question-section" class="hidden" role="region" aria-labelledby="question-section-heading">
+            <div id="question-text" aria-live="polite"></div>
+            <input type="text" id="answer-input" placeholder="Your answer" aria-required="true">
             <button type="button" onclick="submitAnswer()">Submit Answer</button>
         </div>
-        <div id="test-results" class="hidden">
-            <h3>Test Results</h3>
+        <div id="test-results" class="hidden" role="region" aria-labelledby="test-results-heading">
+            <h3 id="test-results-heading">Test Results</h3>
             <div id="score"></div>
             <div id="achievements"></div>
         </div>
     </div>
 
-    <div id="collaboration">
-        <h2>Real-Time Collaboration</h2>
+    <div id="collaboration" role="region" aria-labelledby="collaboration-heading">
+        <h2 id="collaboration-heading">Real-Time Collaboration</h2>
         <form>
             <div>
                 <label for="collaborator-email">Collaborator Email:</label>
-                <input type="email" id="collaborator-email" required>
+                <input type="email" id="collaborator-email" aria-required="true" required>
             </div>
             <div>
                 <button type="button" onclick="addCollaborator()">Add Collaborator</button>
             </div>
         </form>
-        <div id="collaborators-list">
-            <h3>Current Collaborators:</h3>
+        <div id="collaborators-list" role="region" aria-labelledby="collaborators-list-heading">
+            <h3 id="collaborators-list-heading">Current Collaborators:</h3>
         </div>
     </div>
 
-    <div id="analytics-reporting">
-        <h2>Advanced Analytics and Reporting</h2>
+    <div id="analytics-reporting" role="region" aria-labelledby="analytics-reporting-heading">
+        <h2 id="analytics-reporting-heading">Advanced Analytics and Reporting</h2>
         <button type="button" onclick="viewAnalytics()">View Analytics</button>
-        <div id="analytics-details" class="hidden">
-            <h3>Test Analytics</h3>
+        <div id="analytics-details" class="hidden" role="region" aria-labelledby="analytics-details-heading">
+            <h3 id="analytics-details-heading">Test Analytics</h3>
             <div id="analytics-content"></div>
             <button type="button" onclick="hideAnalytics()">Close</button>
         </div>
     </div>
 
-    <div id="version-history" class="hidden">
-        <h2>Version History</h2>
+    <div id="version-history" class="hidden" role="region" aria-labelledby="version-history-heading">
+        <h2 id="version-history-heading">Version History</h2>
         <ul id="version-list"></ul>
-        <button onclick="hideVersionHistory()">Close</button>
+        <button type="button" onclick="hideVersionHistory()">Close</button>
     </div>
 
-    <div id="version-details" class="hidden">
-        <h2>Version Details</h2>
+    <div id="version-details" class="hidden" role="region" aria-labelledby="version-details-heading">
+        <h2 id="version-details-heading">Version Details</h2>
         <div id="version-content"></div>
-        <button onclick="restoreVersion()">Restore Version</button>
-        <button onclick="hideVersionDetails()">Close</button>
+        <button type="button" onclick="restoreVersion()">Restore Version</button>
+        <button type="button" onclick="hideVersionDetails()">Close</button>
     </div>
 
     <script>
