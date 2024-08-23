@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Maker with Feedback and Question Generation</title>
+    <title>Test Maker with Adaptive Testing and Gamification</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,7 +12,7 @@
         .hidden {
             display: none;
         }
-        #feedback-form, #question-generation, #version-history, #version-details {
+        #feedback-form, #question-generation, #version-history, #version-details, #adaptive-testing, #gamification {
             margin-top: 20px;
         }
         button {
@@ -31,7 +31,7 @@
         .version-list-item:hover {
             background-color: #f0f0f0;
         }
-        #generated-questions {
+        #score, #achievements {
             margin-top: 10px;
         }
     </style>
@@ -88,6 +88,21 @@
         <div id="generated-questions"></div>
     </div>
 
+    <div id="adaptive-testing" class="hidden">
+        <h2>Adaptive Testing</h2>
+        <button type="button" onclick="startAdaptiveTest()">Start Test</button>
+        <div id="question-section" class="hidden">
+            <div id="question-text"></div>
+            <input type="text" id="answer-input" placeholder="Your answer">
+            <button type="button" onclick="submitAnswer()">Submit Answer</button>
+        </div>
+        <div id="test-results" class="hidden">
+            <h3>Test Results</h3>
+            <div id="score"></div>
+            <div id="achievements"></div>
+        </div>
+    </div>
+
     <div id="version-history" class="hidden">
         <h2>Version History</h2>
         <ul id="version-list"></ul>
@@ -103,7 +118,6 @@
 
     <script>
         const testId = 'example-test-id'; 
-
         async function saveTest() {
             const title = document.getElementById('test-title').value;
             const description = document.getElementById('test-description').value;
@@ -125,8 +139,7 @@
                 alert('Error saving test version.');
             }
         }
-
-        async function showVersionHistory() {
+istory() {
             try {
                 const response = await fetch(`/api/version-history/${testId}`);
                 const versions = await response.json();
@@ -232,6 +245,39 @@
                 });
             } catch {
                 alert('Error generating questions.');
+            }
+        }
+
+        async function startAdaptiveTest() {
+            document.getElementById('adaptive-testing').classList.remove('hidden');
+            document.getElementById('question-section').classList.remove('hidden');
+
+            try {
+                const response = await fetch('/api/start-adaptive-test');
+                const question = await response.json();
+
+                document.getElementById('question-text').textContent = question.text;
+            } catch {
+                alert('Error starting adaptive test.');
+            }
+        }
+
+        async function submitAnswer() {
+            const answer = document.getElementById('answer-input').value;
+
+            try {
+                const response = await fetch('/api/submit-answer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ answer })
+                });
+                const result = await response.json();
+
+                document.getElementById('question-text').textContent = result.nextQuestion.text;
+                document.getElementById('score').textContent = `Score: ${result.score}`;
+                document.getElementById('achievements').textContent = `Achievements: ${result.achievements.join(', ')}`;
+            } catch {
+                alert('Error submitting answer.');
             }
         }
     </script>
