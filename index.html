@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Maker App</title>
+    <title>Secure Test Maker App</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -185,8 +185,46 @@
             document.head.appendChild(styleSheet);
         }
 
-        function login() 
-        function signup() 
+        async function login() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            const response = await fetch('/api/login', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                loggedInUser = data.user;
+                document.getElementById('profile-button').classList.remove('hidden');
+                document.getElementById('logout-button').classList.remove('hidden');
+                showNotification('success', 'Logged in successfully.');
+                toggleForm('profile');
+            } else {
+                showNotification('error', 'Login failed.');
+            }
+        }
+
+        async function signup() {
+            const username = document.getElementById('signup-username').value;
+            const password = document.getElementById('signup-password').value;
+
+            const response = await fetch('/api/signup', { // Assuming a backend API endpoint
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (response.ok) {
+                showNotification('success', 'Account created successfully.');
+                toggleForm('login');
+            } else {
+                showNotification('error', 'Signup failed.');
+            }
+        }
+
         function logout() {
             loggedInUser = null;
             document.getElementById('profile-button').classList.add('hidden');
@@ -195,6 +233,7 @@
             toggleForm('login');
             showNotification('info', 'Logged out successfully.');
         }
+
         function saveProfile() 
         function toggleEditProfile() 
 
@@ -205,8 +244,8 @@
             questionDiv.id = `question-${questionCount}`;
             questionDiv.innerHTML = `
                 <h3>Question ${questionCount}</h3>
-                <div class="form-group"><label for="question-text-${questionCount}">Question Text:</label><input type="text" id="question-text-${questionCount}"></div>
-                <div class="form-group"><label for="question-type-${questionCount}">Question Type:</label><select id="question-type-${questionCount}"><option value="text">Text</option><option value="multiple-choice">Multiple Choice</option></select></div>
+                <div class="form-group"><label for="question-text-${questionCount}">Question Text:</label><input type="text" id="question-text-${questionCount}" required></div>
+                <div class="form-group"><label for="question-type-${questionCount}">Question Type:</label><select id="question-type-${questionCount}" required><option value="text">Text</option><option value="multiple-choice">Multiple Choice</option></select></div>
                 <button onclick="editQuestion(${questionCount})">Edit</button>
                 <button onclick="removeQuestion(${questionCount})">Remove</button>
                 <button onclick="previewQuestion(${questionCount})">Preview</button>
@@ -215,7 +254,7 @@
             showNotification('success', 'Question added successfully.');
         }
 
-        function editQuestion(id) 
+        function editQuestion(id)
         function removeQuestion(id) {
             document.getElementById(`question-${id}`).remove();
             showNotification('info', `Question ${id} removed.`);
@@ -240,7 +279,7 @@
             showNotification('info', `Removed collaborator: ${email}`);
         }
 
-        function connectLMS() { /* Connect to LMS logic */ }
+        function connectLMS() 
         function uploadTestToLMS() {
             const testId = prompt('Enter test ID:');
             if (testId && tests[testId]) {
