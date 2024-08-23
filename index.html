@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Maker with Version Control</title>
+    <title>Test Maker with Feedback and Question Generation</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,7 +12,7 @@
         .hidden {
             display: none;
         }
-        #version-history, #version-details {
+        #feedback-form, #question-generation, #version-history, #version-details {
             margin-top: 20px;
         }
         button {
@@ -30,6 +30,9 @@
         }
         .version-list-item:hover {
             background-color: #f0f0f0;
+        }
+        #generated-questions {
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -50,6 +53,39 @@
                 <button type="button" onclick="showVersionHistory()">View Version History</button>
             </div>
         </form>
+    </div>
+
+    <div id="feedback-form" class="hidden">
+        <h2>Provide Feedback</h2>
+        <form>
+            <div>
+                <label for="feedback-test-id">Test ID:</label>
+                <input type="text" id="feedback-test-id" required>
+            </div>
+            <div>
+                <label for="feedback-question-id">Question ID:</label>
+                <input type="text" id="feedback-question-id" required>
+            </div>
+            <div>
+                <label for="feedback-comments">Comments:</label>
+                <textarea id="feedback-comments" rows="4" required></textarea>
+            </div>
+            <button type="button" onclick="submitFeedback()">Submit Feedback</button>
+        </form>
+    </div>
+
+    <div id="question-generation">
+        <h2>Generate Questions</h2>
+        <form>
+            <div>
+                <label for="topic">Topic:</label>
+                <input type="text" id="topic" required>
+            </div>
+            <div>
+                <button type="button" onclick="generateQuestions()">Generate Questions</button>
+            </div>
+        </form>
+        <div id="generated-questions"></div>
     </div>
 
     <div id="version-history" class="hidden">
@@ -151,6 +187,52 @@
 
         function hideVersionDetails() {
             document.getElementById('version-details').classList.add('hidden');
+        }
+
+        async function submitFeedback() {
+            const testId = document.getElementById('feedback-test-id').value;
+            const questionId = document.getElementById('feedback-question-id').value;
+            const comments = document.getElementById('feedback-comments').value;
+
+            try {
+                const response = await fetch('/api/submit-feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ testId, questionId, comments })
+                });
+
+                if (response.ok) {
+                    alert('Feedback submitted successfully.');
+                } else {
+                    alert('Failed to submit feedback.');
+                }
+            } catch {
+                alert('Error submitting feedback.');
+            }
+        }
+
+        async function generateQuestions() {
+            const topic = document.getElementById('topic').value;
+
+            try {
+                const response = await fetch('/api/generate-questions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic })
+                });
+                const questions = await response.json();
+
+                const generatedQuestionsDiv = document.getElementById('generated-questions');
+                generatedQuestionsDiv.innerHTML = '<h3>Generated Questions:</h3>';
+
+                questions.forEach(question => {
+                    const p = document.createElement('p');
+                    p.textContent = question.text;
+                    generatedQuestionsDiv.appendChild(p);
+                });
+            } catch {
+                alert('Error generating questions.');
+            }
         }
     </script>
 </body>
