@@ -28,12 +28,25 @@
             padding: 8px;
             box-sizing: border-box;
         }
-        .high-contrast {
-            background-color: #000;
+        .notification {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
             color: #fff;
+            display: none;
         }
-        .high-contrast .container {
-            border: 1px solid #fff;
+        .notification.success {
+            background-color: #4caf50;
+        }
+        .notification.error {
+            background-color: #f44336;
+        }
+        .notification.info {
+            background-color: #2196f3;
+        }
+        .theme-button, .integration-button {
+            padding: 10px;
+            margin: 5px;
         }
         .test-layout-standard .test-question {
             margin-bottom: 15px;
@@ -44,13 +57,15 @@
         .test-layout-expanded .test-question {
             margin-bottom: 30px;
         }
-        .theme-button, .integration-button {
-            padding: 10px;
-            margin: 5px;
-        }
     </style>
 </head>
 <body>
+    <div id="notification-container">
+        <div id="success-notification" class="notification success"></div>
+        <div id="error-notification" class="notification error"></div>
+        <div id="info-notification" class="notification info"></div>
+    </div>
+
     <nav>
         <button onclick="toggleForm('login')" id="login-button">Login</button>
         <button onclick="toggleForm('signup')" id="signup-button">Sign Up</button>
@@ -137,10 +152,20 @@
     </div>
 
     <script>
+        function showNotification(type, message) {
+            const notification = document.getElementById(`${type}-notification`);
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+
         function toggleForm(formId) {
             const forms = ['login', 'signup', 'profile', 'test-maker', 'pool-manager', 'reports', 'collaborate', 'lms-integration'];
             forms.forEach(id => document.getElementById(`${id}-form`)?.classList.add('hidden'));
             document.getElementById(`${formId}-form`)?.classList.remove('hidden');
+            changeLanguage(); 
         }
 
         function applyTheme() {
@@ -161,16 +186,17 @@
         }
 
         function login() 
-        function signup()
+        function signup() 
         function logout() {
             loggedInUser = null;
             document.getElementById('profile-button').classList.add('hidden');
             document.getElementById('reports-button').classList.add('hidden');
             document.getElementById('logout-button').classList.add('hidden');
             toggleForm('login');
+            showNotification('info', 'Logged out successfully.');
         }
         function saveProfile() 
-        function toggleEditProfile()
+        function toggleEditProfile() 
 
         function addQuestion() {
             questionCount++;
@@ -186,28 +212,41 @@
                 <button onclick="previewQuestion(${questionCount})">Preview</button>
             `;
             document.getElementById('test-preview').appendChild(questionDiv);
+            showNotification('success', 'Question added successfully.');
         }
 
-        function editQuestion(id)
-        function removeQuestion(id) { document.getElementById(`question-${id}`).remove(); }
+        function editQuestion(id) 
+        function removeQuestion(id) {
+            document.getElementById(`question-${id}`).remove();
+            showNotification('info', `Question ${id} removed.`);
+        }
         function previewQuestion(id) 
-        function saveTest()
-        function resetForm()  { document.getElementById('test-maker-form').reset(); }
-        function createPool()
+        function saveTest() {
+            showNotification('success', 'Test saved successfully.');
+        }
+        function resetForm() {
+            document.getElementById('test-maker-form').reset();
+            showNotification('info', 'Form reset.');
+        }
+        function createPool() 
         function randomizeQuestions() 
         function showReports() 
         function updateAnalytics() 
-        function inviteCollaborator()
+        function inviteCollaborator() {
+            showNotification('success', 'Collaborator invited.');
+        }
         function updateCollaboratorsList(testId) 
-        function removeCollaborator(testId, email)
+        function removeCollaborator(testId, email) {
+            showNotification('info', `Removed collaborator: ${email}`);
+        }
 
-        function connectLMS()
+        function connectLMS() { /* Connect to LMS logic */ }
         function uploadTestToLMS() {
             const testId = prompt('Enter test ID:');
             if (testId && tests[testId]) {
-                alert('Test uploaded to LMS!');
+                showNotification('success', 'Test uploaded to LMS!');
             } else {
-                alert('Invalid test ID.');
+                showNotification('error', 'Invalid test ID.');
             }
         }
 
