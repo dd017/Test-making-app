@@ -3,194 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Maker App with Analytics</title>
+    <title>Test Maker App</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
         .container { width: 80%; margin: 20px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         h1 { text-align: center; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; }
         .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
-        .form-group button { padding: 10px 15px; background-color: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
-        .form-group button:hover { background-color: #0056b3; }
-        .question-container, .pool-container, .report-container { margin-top: 20px; }
-        .question-preview, .test-preview, .report { margin-top: 10px; }
-        .test-preview div, .report div { margin-bottom: 10px; }
-        .test-preview h2, .report h2 { margin-bottom: 10px; }
-        .question-edit input, .report-container input { margin-bottom: 10px; }
+        .form-group button { padding: 10px 15px; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        .form-group button:hover { background: #0056b3; }
+        .preview, .report { margin-top: 20px; }
+        .preview div, .report div { margin-bottom: 10px; }
+        .edit-form { display: none; }
         .profile-container { margin-top: 20px; }
-        .error { color: red; }
-        .success { color: green; }
+        .error, .success { color: red; }
     </style>
 </head>
 <body>
     <div class="container" id="auth-container">
         <button onclick="toggleForm('login')">Login</button>
         <button onclick="toggleForm('signup')">Sign Up</button>
-        <button onclick="showProfile()" style="display: none;" id="profile-button">Profile</button>
-        <button onclick="showReports()" style="display: none;" id="reports-button">Reports</button>
-        <button onclick="logout()" style="display: none;" id="logout-button">Logout</button>
+        <button onclick="toggleForm('profile')" id="profile-button" style="display: none;">Profile</button>
+        <button onclick="toggleForm('reports')" id="reports-button" style="display: none;">Reports</button>
+        <button onclick="logout()" id="logout-button" style="display: none;">Logout</button>
     </div>
 
     <div class="container" id="login-form" style="display: none;">
         <h1>Login</h1>
-        <div class="form-group">
-            <label for="login-username">Username:</label>
-            <input type="text" id="login-username">
-        </div>
-        <div class="form-group">
-            <label for="login-password">Password:</label>
-            <input type="password" id="login-password">
-        </div>
-        <div class="form-group">
-            <button onclick="login()">Login</button>
-        </div>
+        <div class="form-group"><label for="login-username">Username:</label><input type="text" id="login-username"></div>
+        <div class="form-group"><label for="login-password">Password:</label><input type="password" id="login-password"></div>
+        <div class="form-group"><button onclick="login()">Login</button></div>
     </div>
 
     <div class="container" id="signup-form" style="display: none;">
         <h1>Sign Up</h1>
-        <div class="form-group">
-            <label for="signup-username">Username:</label>
-            <input type="text" id="signup-username">
-        </div>
-        <div class="form-group">
-            <label for="signup-password">Password:</label>
-            <input type="password" id="signup-password">
-        </div>
-        <div class="form-group">
-            <button onclick="signup()">Sign Up</button>
-        </div>
+        <div class="form-group"><label for="signup-username">Username:</label><input type="text" id="signup-username"></div>
+        <div class="form-group"><label for="signup-password">Password:</label><input type="password" id="signup-password"></div>
+        <div class="form-group"><button onclick="signup()">Sign Up</button></div>
     </div>
 
-        <div id="profile-page" style="display: none;">
+    <div class="container" id="profile-page" style="display: none;">
         <h1>User Profile</h1>
         <div class="profile-container">
             <h2>Profile Details</h2>
-            <div class="form-group">
-                <label for="profile-username">Username:</label>
-                <input type="text" id="profile-username" readonly>
-            </div>
-            <div class="form-group">
-                <label for="profile-email">Email:</label>
-                <input type="text" id="profile-email" readonly>
-            </div>
-            <div class="form-group">
-                <button onclick="toggleEditProfile()">Edit Profile</button>
-            </div>
-            <div class="form-group" id="edit-profile-form" style="display: none;">
+            <div class="form-group"><label for="profile-username">Username:</label><input type="text" id="profile-username" readonly></div>
+            <div class="form-group"><label for="profile-email">Email:</label><input type="text" id="profile-email" readonly></div>
+            <div class="form-group"><button onclick="toggleEditProfile()">Edit Profile</button></div>
+            <div class="form-group edit-form" id="edit-profile-form">
                 <h2>Edit Profile</h2>
-                <div class="form-group">
-                    <label for="edit-username">New Username:</label>
-                    <input type="text" id="edit-username">
-                </div>
-                <div class="form-group">
-                    <label for="edit-email">New Email:</label>
-                    <input type="text" id="edit-email">
-                </div>
-                <div class="form-group">
-                    <button onclick="saveProfile()">Save Changes</button>
-                </div>
+                <div class="form-group"><label for="edit-username">New Username:</label><input type="text" id="edit-username"></div>
+                <div class="form-group"><label for="edit-email">New Email:</label><input type="text" id="edit-email"></div>
+                <div class="form-group"><button onclick="saveProfile()">Save Changes</button></div>
             </div>
         </div>
     </div>
 
     <div class="container" id="test-maker" style="display: none;">
         <h1>Test Maker</h1>
-        <div class="form-group">
-            <label for="test-title">Test Title:</label>
-            <input type="text" id="test-title">
-        </div>
-        <div class="form-group">
-            <label for="test-description">Test Description:</label>
-            <textarea id="test-description" rows="4"></textarea>
-        </div>
-        <div class="form-group">
-            <label for="test-start-date">Start Date:</label>
-            <input type="datetime-local" id="test-start-date">
-        </div>
-        <div class="form-group">
-            <label for="test-end-date">End Date:</label>
-            <input type="datetime-local" id="test-end-date">
-        </div>
-        <div class="form-group">
-            <label for="question-pool">Use Question Pool:</label>
-            <select id="question-pool" onchange="updatePreview()">
-                <option value="">Select a pool</option>
-            </select>
-        </div>
+        <div class="form-group"><label for="test-title">Test Title:</label><input type="text" id="test-title"></div>
+        <div class="form-group"><label for="test-description">Test Description:</label><textarea id="test-description" rows="4"></textarea></div>
+        <div class="form-group"><label for="test-start-date">Start Date:</label><input type="datetime-local" id="test-start-date"></div>
+        <div class="form-group"><label for="test-end-date">End Date:</label><input type="datetime-local" id="test-end-date"></div>
+        <div class="form-group"><label for="question-pool">Question Pool:</label><select id="question-pool"><option value="">Select a pool</option></select></div>
         <div class="form-group">
             <button onclick="addQuestion()">Add Question</button>
             <button onclick="randomizeQuestions()">Randomize Questions</button>
             <button onclick="saveTest()">Save Test</button>
             <button onclick="resetForm()">Reset Form</button>
         </div>
-        <div class="question-container" id="question-container"><h2>Questions</h2></div>
-        <div class="test-preview" id="test-preview"><h2>Test Preview</h2><div id="preview-content"></div></div>
+        <div class="preview" id="test-preview"><h2>Test Preview</h2><div id="preview-content"></div></div>
     </div>
 
     <div class="container" id="pool-manager" style="display: none;">
         <h1>Manage Question Pools</h1>
-        <div class="form-group">
-            <label for="pool-title">Pool Title:</label>
-            <input type="text" id="pool-title">
-        </div>
-        <div class="form-group">
-            <label for="pool-description">Pool Description:</label>
-            <textarea id="pool-description" rows="4"></textarea>
-        </div>
-        <div class="form-group">
-            <button onclick="createPool()">Create Pool</button>
-        </div>
-        <div class="pool-container" id="pool-container"><h2>Question Pools</h2></div>
+        <div class="form-group"><label for="pool-title">Pool Title:</label><input type="text" id="pool-title"></div>
+        <div class="form-group"><label for="pool-description">Pool Description:</label><textarea id="pool-description" rows="4"></textarea></div>
+        <div class="form-group"><button onclick="createPool()">Create Pool</button></div>
+        <div class="preview" id="pool-container"><h2>Question Pools</h2></div>
     </div>
 
     <div class="container" id="question-edit" style="display: none;">
         <h1>Edit Question</h1>
-        <div class="question-edit">
-            <div>
-                <label for="edit-question-text">Question Text:</label>
-                <input type="text" id="edit-question-text">
-            </div>
-            <div>
-                <label for="edit-question-type">Question Type:</label>
-                <select id="edit-question-type" onchange="toggleEditOptions()">
-                    <option value="multiple-choice">Multiple Choice</option>
-                    <option value="true-false">True/False</option>
-                    <option value="short-answer">Short Answer</option>
-                </select>
-            </div>
-            <div id="edit-options" style="display: none;">
-                <label for="edit-options-text">Options (comma-separated):</label>
-                <input type="text" id="edit-options-text">
-            </div>
-            <div>
-                <button onclick="saveEditedQuestion()">Save Changes</button>
-                <button onclick="cancelEdit()">Cancel</button>
-            </div>
+        <div class="form-group"><label for="edit-question-text">Question Text:</label><input type="text" id="edit-question-text"></div>
+        <div class="form-group">
+            <label for="edit-question-type">Question Type:</label>
+            <select id="edit-question-type" onchange="toggleEditOptions()">
+                <option value="multiple-choice">Multiple Choice</option>
+                <option value="true-false">True/False</option>
+                <option value="short-answer">Short Answer</option>
+            </select>
         </div>
+        <div class="form-group edit-form" id="edit-options">
+            <label for="edit-options-text">Options (comma-separated):</label>
+            <input type="text" id="edit-options-text">
+        </div>
+        <div class="form-group"><button onclick="saveEditedQuestion()">Save Changes</button><button onclick="cancelEdit()">Cancel</button></div>
     </div>
 
     <div class="container" id="reports-page" style="display: none;">
         <h1>Analytics and Reporting</h1>
-        <div class="report-container" id="report-container"><h2>Reports</h2></div>
+        <div class="report" id="report-container"><h2>Reports</h2></div>
     </div>
 
     <script>
         let loggedInUser = null;
-        let testCount = 0;
-        let poolCount = 0;
         let tests = {};
         let pools = {};
-        let currentEditingQuestionId = null;
+        let questionCount = 0;
 
         function toggleForm(form) {
-            document.getElementById('login-form').style.display = form === 'login' ? 'block' : 'none';
-            document.getElementById('signup-form').style.display = form === 'signup' ? 'block' : 'none';
-            document.getElementById('profile-page').style.display = form === 'profile' ? 'block' : 'none';
-            document.getElementById('test-maker').style.display = form === 'test-maker' ? 'block' : 'none';
-            document.getElementById('pool-manager').style.display = form === 'pool-manager' ? 'block' : 'none';
-            document.getElementById('question-edit').style.display = form === 'question-edit' ? 'block' : 'none';
-            document.getElementById('reports-page').style.display = form === 'reports' ? 'block' : 'none';
+            const forms = ['login', 'signup', 'profile', 'test-maker', 'pool-manager', 'question-edit', 'reports'];
+            forms.forEach(f => document.getElementById(`${f}-form`).style.display = f === form ? 'block' : 'none');
         }
 
         function login() {
@@ -198,9 +122,9 @@
             const password = document.getElementById('login-password').value;
             if (username && password) {
                 loggedInUser = { username };
-                document.getElementById('profile-button').style.display = 'inline-block';
-                document.getElementById('reports-button').style.display = 'inline-block';
-                document.getElementById('logout-button').style.display = 'inline-block';
+                document.getElementById('profile-button').style.display = 'inline';
+                document.getElementById('reports-button').style.display = 'inline';
+                document.getElementById('logout-button').style.display = 'inline';
                 toggleForm('test-maker');
             } else {
                 alert('Please enter username and password.');
@@ -229,7 +153,6 @@
         function showProfile() {
             if (loggedInUser) {
                 document.getElementById('profile-username').value = loggedInUser.username;
-                document.getElementById('profile-email').value = loggedInUser.email || '';
                 toggleForm('profile');
             }
         }
@@ -254,73 +177,58 @@
             const endDate = document.getElementById('test-end-date').value;
             const poolId = document.getElementById('question-pool').value;
             if (!title || !description || !startDate || !endDate) return alert('Please fill in all fields.');
-            
-            testCount++;
-            const container = document.getElementById('question-container');
+
+            questionCount++;
+            const container = document.getElementById('test-preview');
             const questionDiv = document.createElement('div');
-            questionDiv.id = `question-${testCount}`;
+            questionDiv.id = `question-${questionCount}`;
             questionDiv.innerHTML = `
-                <h3>Question ${testCount}</h3>
+                <h3>Question ${questionCount}</h3>
+                <div class="form-group"><label for="question-text-${questionCount}">Question Text:</label><input type="text" id="question-text-${questionCount}" oninput="updatePreview()"></div>
                 <div class="form-group">
-                    <label for="question-text-${testCount}">Question Text:</label>
-                    <input type="text" id="question-text-${testCount}" oninput="updatePreview()">
-                </div>
-                <div class="form-group">
-                    <label for="question-type-${testCount}">Question Type:</label>
-                    <select id="question-type-${testCount}" onchange="toggleOptions(${testCount})">
+                    <label for="question-type-${questionCount}">Question Type:</label>
+                    <select id="question-type-${questionCount}" onchange="toggleOptions(${questionCount})">
                         <option value="multiple-choice">Multiple Choice</option>
                         <option value="true-false">True/False</option>
                         <option value="short-answer">Short Answer</option>
                     </select>
                 </div>
-                <div class="form-group" id="options-${testCount}" style="display: none;">
+                <div class="form-group" id="options-${questionCount}" style="display: none;">
                     <label>Options (comma-separated):</label>
-                    <input type="text" id="options-text-${testCount}" oninput="updatePreview()">
+                    <input type="text" id="options-text-${questionCount}" oninput="updatePreview()">
                 </div>
                 <div class="form-group">
-                    <button onclick="editQuestion(${testCount})">Edit</button>
-                    <button onclick="removeQuestion(${testCount})">Remove</button>
+                    <button onclick="editQuestion(${questionCount})">Edit</button>
+                    <button onclick="removeQuestion(${questionCount})">Remove</button>
                 </div>
-                <div id="question-preview-${testCount}" class="question-preview"></div>
+                <div id="question-preview-${questionCount}" class="question-preview"></div>
             `;
             container.appendChild(questionDiv);
             resetForm();
         }
 
         function toggleOptions(questionNumber) {
-            document.getElementById(`options-${questionNumber}`).style.display = 
-                document.getElementById(`question-type-${questionNumber}`).value === 'multiple-choice' ? 'block' : 'none';
+            document.getElementById(`options-${questionNumber}`).style.display = document.getElementById(`question-type-${questionNumber}`).value === 'multiple-choice' ? 'block' : 'none';
             updatePreview();
         }
 
         function updatePreview() {
             const previewContent = document.getElementById('preview-content');
-            previewContent.innerHTML = '';
-            const title = document.getElementById('test-title').value;
-            const description = document.getElementById('test-description').value;
-            const startDate = document.getElementById('test-start-date').value;
-            const endDate = document.getElementById('test-end-date').value;
-            if (title || description || startDate || endDate) {
-                previewContent.innerHTML += `
-                    <h2>${title}</h2>
-                    <p>${description}</p>
-                    <p><strong>Start Date:</strong> ${startDate}</p>
-                    <p><strong>End Date:</strong> ${endDate}</p>
-                `;
-            }
-            for (let i = 1; i <= testCount; i++) {
-                const questionText = document.getElementById(`question-text-${i}`).value || '';
-                const questionType = document.getElementById(`question-type-${i}`).value || '';
-                const optionsText = document.getElementById(`options-text-${i}`).value || '';
-                const options = optionsText ? optionsText.split(',').map(opt => opt.trim()) : [];
-                let optionsHtml = '';
-                if (questionType === 'multiple-choice' && options.length > 0) {
-                    optionsHtml = `<ul>${options.map(opt => `<li>${opt}</li>`).join('')}</ul>`;
-                }
+            previewContent.innerHTML = `
+                <h2>${document.getElementById('test-title').value}</h2>
+                <p>${document.getElementById('test-description').value}</p>
+                <p><strong>Start Date:</strong> ${document.getElementById('test-start-date').value}</p>
+                <p><strong>End Date:</strong> ${document.getElementById('test-end-date').value}</p>
+            `;
+            for (let i = 1; i <= questionCount; i++) {
+                const text = document.getElementById(`question-text-${i}`).value || '';
+                const type = document.getElementById(`question-type-${i}`).value || '';
+                const options = (document.getElementById(`options-text-${i}`).value || '').split(',').map(opt => opt.trim()).filter(Boolean);
+                let optionsHtml = type === 'multiple-choice' ? `<ul>${options.map(opt => `<li>${opt}</li>`).join('')}</ul>` : '';
                 previewContent.innerHTML += `
                     <div>
-                        <p><strong>Question ${i}:</strong> ${questionText}</p>
-                        <p><strong>Type:</strong> ${questionType}</p>
+                        <p><strong>Question ${i}:</strong> ${text}</p>
+                        <p><strong>Type:</strong> ${type}</p>
                         ${optionsHtml ? `<p><strong>Options:</strong></p>${optionsHtml}` : ''}
                     </div>
                 `;
@@ -330,13 +238,9 @@
         function previewQuestion(questionNumber) {
             const text = document.getElementById(`question-text-${questionNumber}`).value;
             const type = document.getElementById(`question-type-${questionNumber}`).value;
-            const optionsText = document.getElementById(`options-text-${questionNumber}`).value;
-            const options = optionsText ? optionsText.split(',').map(opt => opt.trim()) : [];
+            const options = (document.getElementById(`options-text-${questionNumber}`).value || '').split(',').map(opt => opt.trim()).filter(Boolean);
             const previewDiv = document.getElementById(`question-preview-${questionNumber}`);
-            let optionsHtml = '';
-            if (type === 'multiple-choice' && options.length > 0) {
-                optionsHtml = `<ul>${options.map(opt => `<li>${opt}</li>`).join('')}</ul>`;
-            }
+            let optionsHtml = type === 'multiple-choice' ? `<ul>${options.map(opt => `<li>${opt}</li>`).join('')}</ul>` : '';
             previewDiv.innerHTML = `
                 <p><strong>Question:</strong> ${text}</p>
                 <p><strong>Type:</strong> ${type}</p>
@@ -350,20 +254,16 @@
         }
 
         function editQuestion(questionNumber) {
-            const text = document.getElementById(`question-text-${questionNumber}`).value;
-            const type = document.getElementById(`question-type-${questionNumber}`).value;
-            const optionsText = document.getElementById(`options-text-${questionNumber}`).value;
-            document.getElementById('edit-question-text').value = text;
-            document.getElementById('edit-question-type').value = type;
-            document.getElementById('edit-options-text').value = optionsText;
+            document.getElementById('edit-question-text').value = document.getElementById(`question-text-${questionNumber}`).value;
+            document.getElementById('edit-question-type').value = document.getElementById(`question-type-${questionNumber}`).value;
+            document.getElementById('edit-options-text').value = document.getElementById(`options-text-${questionNumber}`).value;
             toggleEditOptions();
             currentEditingQuestionId = questionNumber;
             toggleForm('question-edit');
         }
 
         function toggleEditOptions() {
-            document.getElementById('edit-options').style.display = 
-                document.getElementById('edit-question-type').value === 'multiple-choice' ? 'block' : 'none';
+            document.getElementById('edit-options').style.display = document.getElementById('edit-question-type').value === 'multiple-choice' ? 'block' : 'none';
         }
 
         function saveEditedQuestion() {
@@ -389,16 +289,13 @@
             const endDate = document.getElementById('test-end-date').value;
             if (!title || !description || !startDate || !endDate) return alert('Please fill in all fields.');
             
-            testCount++;
-            tests[testCount] = { title, description, startDate, endDate, questions: [] };
-            for (let i = 1; i <= testCount; i++) {
+            const testId = Date.now();
+            tests[testId] = { title, description, startDate, endDate, questions: [] };
+            for (let i = 1; i <= questionCount; i++) {
                 const text = document.getElementById(`question-text-${i}`).value;
                 const type = document.getElementById(`question-type-${i}`).value;
-                const optionsText = document.getElementById(`options-text-${i}`).value;
-                const options = optionsText ? optionsText.split(',').map(opt => opt.trim()) : [];
-                if (text) {
-                    tests[testCount].questions.push({ text, type, options });
-                }
+                const options = (document.getElementById(`options-text-${i}`).value || '').split(',').map(opt => opt.trim()).filter(Boolean);
+                if (text) tests[testId].questions.push({ text, type, options });
             }
             alert('Test saved!');
             updateAnalytics();
@@ -407,10 +304,8 @@
 
         function updateAnalytics() {
             const reportContainer = document.getElementById('report-container');
-            reportContainer.innerHTML = '<h2>Analytics Report</h2>';
-            const testCounts = Object.keys(tests).length;
-            reportContainer.innerHTML += `<p>Total Tests Created: ${testCounts}</p>`;
-            for (const [testId, test] of Object.entries(tests)) {
+            reportContainer.innerHTML = `<h2>Analytics Report</h2><p>Total Tests Created: ${Object.keys(tests).length}</p>`;
+            Object.values(tests).forEach(test => {
                 reportContainer.innerHTML += `
                     <div>
                         <h3>${test.title}</h3>
@@ -420,7 +315,7 @@
                         <p><strong>Number of Questions:</strong> ${test.questions.length}</p>
                     </div>
                 `;
-            }
+            });
         }
 
         function createPool() {
@@ -428,8 +323,8 @@
             const description = document.getElementById('pool-description').value;
             if (!title || !description) return alert('Please fill in all fields.');
             
-            poolCount++;
-            pools[poolCount] = { title, description, questions: [] };
+            const poolId = Date.now();
+            pools[poolId] = { title, description, questions: [] };
             updatePoolDropdown();
             alert('Question pool created!');
             resetForm();
@@ -438,25 +333,30 @@
         function updatePoolDropdown() {
             const poolDropdown = document.getElementById('question-pool');
             poolDropdown.innerHTML = '<option value="">Select a pool</option>';
-            for (const poolId in pools) {
-                poolDropdown.innerHTML += `<option value="${poolId}">${pools[poolId].title}</option>`;
-            }
+            Object.entries(pools).forEach(([poolId, pool]) => {
+                poolDropdown.innerHTML += `<option value="${poolId}">${pool.title}</option>`;
+            });
         }
 
         function randomizeQuestions() {
-            const container = document.getElementById('question-container');
+            const container = document.getElementById('test-preview');
             const questions = Array.from(container.querySelectorAll('div[id^="question-"]'));
-            questions.sort(() => Math.random() - 0.5);
-            container.innerHTML = '<h2>Questions</h2>';
-            questions.forEach(question => container.appendChild(question));
+            questions.sort(() => Math.random() - 0.5).forEach(q => container.appendChild(q));
             updatePreview();
         }
 
         function showReports() {
             if (loggedInUser) {
                 updateAnalytics();
-                toggleForm('reports-page');
+                toggleForm('reports');
             }
+        }
+
+        function resetForm() {
+            document.querySelectorAll('.form-group input, .form-group textarea').forEach(input => input.value = '');
+            document.querySelectorAll('.question-preview').forEach(div => div.innerHTML = '');
+            questionCount = 0;
+            updatePreview();
         }
     </script>
 </body>
