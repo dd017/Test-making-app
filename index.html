@@ -55,8 +55,20 @@
         .question-container div {
             margin-bottom: 10px;
         }
+        .question-preview {
+            margin-top: 10px;
+        }
+        .question-preview button {
+            background-color: #dc3545;
+        }
+        .question-preview button:hover {
+            background-color: #c82333;
+        }
         .test-preview {
             margin-top: 20px;
+        }
+        .test-preview h2 {
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -74,12 +86,15 @@
         </div>
         <div class="form-group">
             <button onclick="addQuestion()">Add Question</button>
+            <button onclick="saveTest()">Save Test</button>
+            <button onclick="resetForm()">Reset Form</button>
         </div>
 
         <div class="question-container" id="question-container">
             <h2>Questions</h2>
         </div>
 
+        <!-- Test Preview -->
         <div class="test-preview" id="test-preview">
             <h2>Test Preview</h2>
             <div id="preview-content"></div>
@@ -90,9 +105,17 @@
         let questionCount = 0;
 
         function addQuestion() {
+            const title = document.getElementById('test-title').value;
+            const description = document.getElementById('test-description').value;
+            if (!title || !description) {
+                alert('Please enter the test title and description.');
+                return;
+            }
+
             questionCount++;
             const container = document.getElementById('question-container');
             const questionDiv = document.createElement('div');
+            questionDiv.setAttribute('id', `question-${questionCount}`);
             questionDiv.innerHTML = `
                 <h3>Question ${questionCount}</h3>
                 <div class="form-group">
@@ -101,28 +124,72 @@
                 </div>
                 <div class="form-group">
                     <label for="question-type-${questionCount}">Question Type:</label>
-                    <select id="question-type-${questionCount}">
+                    <select id="question-type-${questionCount}" onchange="toggleOptions(${questionCount})">
                         <option value="multiple-choice">Multiple Choice</option>
                         <option value="true-false">True/False</option>
                         <option value="short-answer">Short Answer</option>
                     </select>
                 </div>
+                <div class="form-group" id="options-${questionCount}" style="display: none;">
+                    <label>Options (comma-separated):</label>
+                    <input type="text" id="options-text-${questionCount}" placeholder="Enter options">
+                </div>
                 <div class="form-group">
                     <button onclick="previewQuestion(${questionCount})">Preview Question</button>
+                    <button onclick="removeQuestion(${questionCount})">Remove Question</button>
                 </div>
                 <div id="question-preview-${questionCount}" class="question-preview"></div>
             `;
             container.appendChild(questionDiv);
+
+            document.getElementById('test-title').value = '';
+            document.getElementById('test-description').value = '';
+        }
+
+        function toggleOptions(questionNumber) {
+            const type = document.getElementById(`question-type-${questionNumber}`).value;
+            const optionsDiv = document.getElementById(`options-${questionNumber}`);
+            if (type === 'multiple-choice') {
+                optionsDiv.style.display = 'block';
+            } else {
+                optionsDiv.style.display = 'none';
+            }
         }
 
         function previewQuestion(questionNumber) {
             const text = document.getElementById(`question-text-${questionNumber}`).value;
             const type = document.getElementById(`question-type-${questionNumber}`).value;
+            const optionsText = document.getElementById(`options-text-${questionNumber}`).value;
+            const options = optionsText ? optionsText.split(',').map(opt => opt.trim()) : [];
             const previewDiv = document.getElementById(`question-preview-${questionNumber}`);
+
+            let optionsHtml = '';
+            if (type === 'multiple-choice' && options.length > 0) {
+                optionsHtml = `<ul>${options.map(opt => `<li>${opt}</li>`).join('')}</ul>`;
+            }
+
             previewDiv.innerHTML = `
                 <p><strong>Question:</strong> ${text}</p>
                 <p><strong>Type:</strong> ${type}</p>
+                ${optionsHtml ? `<p><strong>Options:</strong></p>${optionsHtml}` : ''}
             `;
+        }
+
+        function removeQuestion(questionNumber) {
+            const questionDiv = document.getElementById(`question-${questionNumber}`);
+            questionDiv.remove();
+        }
+
+        function saveTest() {
+            alert('Test saved!');
+        }
+
+        function resetForm() {
+            document.getElementById('test-title').value = '';
+            document.getElementById('test-description').value = '';
+            document.getElementById('question-container').innerHTML = '';
+            document.getElementById('preview-content').innerHTML = '';
+            questionCount = 0;
         }
     </script>
 </body>
