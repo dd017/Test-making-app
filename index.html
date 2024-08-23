@@ -21,6 +21,8 @@
         .collaborators-list ul { list-style: none; padding: 0; }
         .collaborators-list li { margin: 5px 0; }
         .collaborators-list button { margin-left: 10px; }
+        .integration { margin-top: 20px; }
+        .integration-button { margin-right: 10px; }
     </style>
 </head>
 <body>
@@ -107,16 +109,25 @@
         <div class="form-group"><button onclick="saveEditedQuestion()">Save Changes</button><button onclick="cancelEdit()">Cancel</button></div>
     </div>
 
-    <div class="container" id="reports-page" style="display: none;">
-        <h1>Analytics and Reporting</h1>
-        <div class="report" id="report-container"><h2>Reports</h2></div>
+    <div class="container" id="reports" style="display: none;">
+        <h1>Analytics and Reports</h1>
+        <div id="report-container" class="report"></div>
     </div>
 
-    <div class="container" id="collaborate-page" style="display: none;">
+    <div class="container" id="collaborate" style="display: none;">
         <h1>Manage Collaborators</h1>
-        <div class="form-group"><label for="collaborator-email">Invite Collaborator (by email):</label><input type="email" id="collaborator-email"></div>
+        <div class="form-group"><label for="collaborator-email">Collaborator Email:</label><input type="text" id="collaborator-email"></div>
         <div class="form-group"><button onclick="inviteCollaborator()">Invite</button></div>
         <div class="collaborators-list" id="collaborators-list"><h2>Collaborators</h2></div>
+    </div>
+
+    <div class="container" id="lms-integration" style="display: none;">
+        <h1>LMS Integration</h1>
+        <div class="form-group">
+            <button class="integration-button" onclick="connectLMS()">Connect to LMS</button>
+            <button class="integration-button" onclick="uploadTestToLMS()">Upload Test to LMS</button>
+        </div>
+        <div id="lms-status"></div>
     </div>
 
     <script>
@@ -128,7 +139,7 @@
         const collaborators = {};
 
         function toggleForm(formId) {
-            const forms = ['login', 'signup', 'profile', 'test-maker', 'pool-manager', 'question-edit', 'reports', 'collaborate'];
+            const forms = ['login', 'signup', 'profile', 'test-maker', 'pool-manager', 'question-edit', 'reports', 'collaborate', 'lms-integration'];
             forms.forEach(id => document.getElementById(`${id}-form`)?.style.display = 'none');
             document.getElementById(`${formId}-form`)?.style.display = 'block';
         }
@@ -283,14 +294,13 @@
         }
 
         function saveEditedQuestion() {
-            if (currentEditingQuestionId !== null) {
-                document.getElementById(`question-text-${currentEditingQuestionId}`).value = document.getElementById('edit-question-text').value;
-                document.getElementById(`question-type-${currentEditingQuestionId}`).value = document.getElementById('edit-question-type').value;
-                document.getElementById(`options-text-${currentEditingQuestionId}`).value = document.getElementById('edit-options-text').value;
-                previewQuestion(currentEditingQuestionId);
-                alert('Question updated!');
-                toggleForm('test-maker');
-            }
+            if (currentEditingQuestionId === null) return;
+            document.getElementById(`question-text-${currentEditingQuestionId}`).value = document.getElementById('edit-question-text').value;
+            document.getElementById(`question-type-${currentEditingQuestionId}`).value = document.getElementById('edit-question-type').value;
+            document.getElementById(`options-text-${currentEditingQuestionId}`).value = document.getElementById('edit-options-text').value;
+            previewQuestion(currentEditingQuestionId);
+            currentEditingQuestionId = null;
+            toggleForm('test-maker');
         }
 
         function cancelEdit() {
@@ -303,16 +313,18 @@
             const description = document.getElementById('test-description').value;
             const startDate = document.getElementById('test-start-date').value;
             const endDate = document.getElementById('test-end-date').value;
+            const poolId = document.getElementById('question-pool').value;
+
             if (!title || !description || !startDate || !endDate) return alert('Please fill in all fields.');
-            
+
             const testId = Date.now();
             tests[testId] = { title, description, startDate, endDate, questions: [] };
-            Object.keys(pools).forEach(poolId => {
-                const pool = pools[poolId];
-                pools[poolId].questions.forEach(question => {
-                    tests[testId].questions.push(question);
-                });
-            });
+            for (let i = 1; i <= questionCount; i++) {
+                const text = document.getElementById(`question-text-${i}`).value || '';
+                const type = document.getElementById(`question-type-${i}`).value || '';
+                const options = (document.getElementById(`options-text-${i}`).value || '').split(',').map(opt => opt.trim()).filter(Boolean);
+                tests[testId].questions.push({ text, type, options });
+            }
             alert('Test saved!');
             resetForm();
         }
@@ -399,6 +411,24 @@
                 collaborators[testId] = collaborators[testId].filter(collab => collab !== email);
                 updateCollaboratorsList(testId);
                 alert('Collaborator removed!');
+            }
+        }
+
+        function connectLMS() {
+            document.getElementById('lms-status').innerHTML = 'Connected to LMS!';
+        }
+
+        function uploadTestToLMS() {
+            if (loggedInUser) {
+                const testId = prompt('Enter the test ID to upload:');
+                if (testId && tests[testId]) {
+                    // Simulate API call to upload test data to LMS
+                    document.getElementById('lms-status').innerHTML = `Test ${testId} uploaded to LMS!`;
+                } else {
+                    alert('Invalid test ID.');
+                }
+            } else {
+                alert('Please log in first.');
             }
         }
     </script>
