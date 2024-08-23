@@ -152,6 +152,7 @@
 
     <div class="container" id="test-maker" style="display: none;">
         <h1>Test Maker</h1>
+        <!-- Create Test Form -->
         <div class="form-group">
             <label for="test-title">Test Title:</label>
             <input type="text" id="test-title" placeholder="Enter test title">
@@ -272,11 +273,11 @@
                 <h3>Question ${questionCount}</h3>
                 <div class="form-group">
                     <label for="question-text-${questionCount}">Question Text:</label>
-                    <input type="text" id="question-text-${questionCount}" placeholder="Enter question text">
+                    <input type="text" id="question-text-${questionCount}" placeholder="Enter question text" oninput="updatePreview()">
                 </div>
                 <div class="form-group">
                     <label for="question-type-${questionCount}">Question Type:</label>
-                    <select id="question-type-${questionCount}" onchange="toggleOptions(${questionCount})">
+                    <select id="question-type-${questionCount}" onchange="toggleOptions(${questionCount})" oninput="updatePreview()">
                         <option value="multiple-choice">Multiple Choice</option>
                         <option value="true-false">True/False</option>
                         <option value="short-answer">Short Answer</option>
@@ -284,7 +285,7 @@
                 </div>
                 <div class="form-group" id="options-${questionCount}" style="display: none;">
                     <label>Options (comma-separated):</label>
-                    <input type="text" id="options-text-${questionCount}" placeholder="Enter options">
+                    <input type="text" id="options-text-${questionCount}" placeholder="Enter options" oninput="updatePreview()">
                 </div>
                 <div class="form-group">
                     <button onclick="previewQuestion(${questionCount})">Preview Question</button>
@@ -296,6 +297,8 @@
 
             document.getElementById('test-title').value = '';
             document.getElementById('test-description').value = '';
+
+            updatePreview();
         }
 
         function toggleOptions(questionNumber) {
@@ -305,6 +308,38 @@
                 optionsDiv.style.display = 'block';
             } else {
                 optionsDiv.style.display = 'none';
+            }
+            updatePreview();
+        }
+
+        function updatePreview() {
+            const previewContent = document.getElementById('preview-content');
+            previewContent.innerHTML = '';
+
+            const title = document.getElementById('test-title').value;
+            const description = document.getElementById('test-description').value;
+            if (title || description) {
+                previewContent.innerHTML += `<h2>${title}</h2><p>${description}</p>`;
+            }
+
+            for (let i = 1; i <= questionCount; i++) {
+                const questionText = document.getElementById(`question-text-${i}`)?.value || '';
+                const questionType = document.getElementById(`question-type-${i}`)?.value || '';
+                const optionsText = document.getElementById(`options-text-${i}`)?.value || '';
+                const options = optionsText ? optionsText.split(',').map(opt => opt.trim()) : [];
+
+                let optionsHtml = '';
+                if (questionType === 'multiple-choice' && options.length > 0) {
+                    optionsHtml = `<ul>${options.map(opt => `<li>${opt}</li>`).join('')}</ul>`;
+                }
+
+                previewContent.innerHTML += `
+                    <div>
+                        <p><strong>Question ${i}:</strong> ${questionText}</p>
+                        <p><strong>Type:</strong> ${questionType}</p>
+                        ${optionsHtml ? `<p><strong>Options:</strong></p>${optionsHtml}` : ''}
+                    </div>
+                `;
             }
         }
 
@@ -330,6 +365,7 @@
         function removeQuestion(questionNumber) {
             const questionDiv = document.getElementById(`question-${questionNumber}`);
             questionDiv.remove();
+            updatePreview();
         }
 
         function saveTest() {
