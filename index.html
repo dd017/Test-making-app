@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Maker with Adaptive Testing and Gamification</title>
+    <title>Test Maker with Collaboration and Analytics</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,7 +12,7 @@
         .hidden {
             display: none;
         }
-        #feedback-form, #question-generation, #version-history, #version-details, #adaptive-testing, #gamification {
+        #feedback-form, #question-generation, #version-history, #version-details, #adaptive-testing, #gamification, #collaboration, #analytics-reporting {
             margin-top: 20px;
         }
         button {
@@ -31,8 +31,11 @@
         .version-list-item:hover {
             background-color: #f0f0f0;
         }
-        #score, #achievements {
+        #score, #achievements, #collaborators-list, #analytics-details {
             margin-top: 10px;
+        }
+        #analytics-details {
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -103,6 +106,32 @@
         </div>
     </div>
 
+    <div id="collaboration">
+        <h2>Real-Time Collaboration</h2>
+        <form>
+            <div>
+                <label for="collaborator-email">Collaborator Email:</label>
+                <input type="email" id="collaborator-email" required>
+            </div>
+            <div>
+                <button type="button" onclick="addCollaborator()">Add Collaborator</button>
+            </div>
+        </form>
+        <div id="collaborators-list">
+            <h3>Current Collaborators:</h3>
+        </div>
+    </div>
+
+    <div id="analytics-reporting">
+        <h2>Advanced Analytics and Reporting</h2>
+        <button type="button" onclick="viewAnalytics()">View Analytics</button>
+        <div id="analytics-details" class="hidden">
+            <h3>Test Analytics</h3>
+            <div id="analytics-content"></div>
+            <button type="button" onclick="hideAnalytics()">Close</button>
+        </div>
+    </div>
+
     <div id="version-history" class="hidden">
         <h2>Version History</h2>
         <ul id="version-list"></ul>
@@ -117,7 +146,8 @@
     </div>
 
     <script>
-        const testId = 'example-test-id'; 
+        const testId = 'example-test-id';
+
         async function saveTest() {
             const title = document.getElementById('test-title').value;
             const description = document.getElementById('test-description').value;
@@ -139,7 +169,8 @@
                 alert('Error saving test version.');
             }
         }
-istory() {
+
+        async function showVersionHistory() {
             try {
                 const response = await fetch(`/api/version-history/${testId}`);
                 const versions = await response.json();
@@ -280,6 +311,69 @@ istory() {
                 alert('Error submitting answer.');
             }
         }
+
+        async function addCollaborator() {
+            const email = document.getElementById('collaborator-email').value;
+
+            try {
+                const response = await fetch('/api/add-collaborator', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ testId, email })
+                });
+
+                if (response.ok) {
+                    alert('Collaborator added successfully.');
+                    loadCollaborators();
+                } else {
+                    alert('Failed to add collaborator.');
+                }
+            } catch {
+                alert('Error adding collaborator.');
+            }
+        }
+
+        async function loadCollaborators() {
+            try {
+                const response = await fetch(`/api/collaborators/${testId}`);
+                const collaborators = await response.json();
+
+                const collaboratorsList = document.getElementById('collaborators-list');
+                collaboratorsList.innerHTML = '<h3>Current Collaborators:</h3>';
+
+                collaborators.forEach(collaborator => {
+                    const p = document.createElement('p');
+                    p.textContent = collaborator.email;
+                    collaboratorsList.appendChild(p);
+                });
+            } catch {
+                alert('Error loading collaborators.');
+            }
+        }
+
+        async function viewAnalytics() {
+            try {
+                const response = await fetch(`/api/analytics/${testId}`);
+                const analytics = await response.json();
+
+                const analyticsContent = document.getElementById('analytics-content');
+                analyticsContent.innerHTML = `<p><strong>Total Tests Taken:</strong> ${analytics.totalTests}</p>
+                                              <p><strong>Average Score:</strong> ${analytics.averageScore}</p>
+                                              <p><strong>Top Performer:</strong> ${analytics.topPerformer.email} (${analytics.topPerformer.score})</p>`;
+
+                document.getElementById('analytics-details').classList.remove('hidden');
+            } catch {
+                alert('Error fetching analytics.');
+            }
+        }
+
+        function hideAnalytics() {
+            document.getElementById('analytics-details').classList.add('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCollaborators();
+        });
     </script>
 </body>
 </html>
