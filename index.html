@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Maker App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-group button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+        .question-container {
+            margin-top: 20px;
+        }
+        .question-container h2 {
+            margin-bottom: 10px;
+        }
+        .question-container div {
+            margin-bottom: 10px;
+        }
+        .test-preview {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Maker App</h1>
+
+        <div class="form-group">
+            <label for="test-title">Test Title:</label>
+            <input type="text" id="test-title" placeholder="Enter test title">
+        </div>
+        <div class="form-group">
+            <label for="test-description">Test Description:</label>
+            <textarea id="test-description" rows="4" placeholder="Enter test description"></textarea>
+        </div>
+        <div class="form-group">
+            <button onclick="addQuestion()">Add Question</button>
+        </div>
+
+        <div class="question-container" id="question-container">
+            <h2>Questions</h2>
+        </div>
+
+        <div class="test-preview" id="test-preview">
+            <h2>Test Preview</h2>
+            <div id="preview-content"></div>
+        </div>
+    </div>
+
+    <script>
+        let questionCount = 0;
+
+        function addQuestion() {
+            questionCount++;
+            const container = document.getElementById('question-container');
+            const questionDiv = document.createElement('div');
+            questionDiv.innerHTML = `
+                <h3>Question ${questionCount}</h3>
+                <div class="form-group">
+                    <label for="question-text-${questionCount}">Question Text:</label>
+                    <input type="text" id="question-text-${questionCount}" placeholder="Enter question text">
+                </div>
+                <div class="form-group">
+                    <label for="question-type-${questionCount}">Question Type:</label>
+                    <select id="question-type-${questionCount}">
+                        <option value="multiple-choice">Multiple Choice</option>
+                        <option value="true-false">True/False</option>
+                        <option value="short-answer">Short Answer</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button onclick="previewQuestion(${questionCount})">Preview Question</button>
+                </div>
+                <div id="question-preview-${questionCount}" class="question-preview"></div>
+            `;
+            container.appendChild(questionDiv);
+        }
+
+        function previewQuestion(questionNumber) {
+            const text = document.getElementById(`question-text-${questionNumber}`).value;
+            const type = document.getElementById(`question-type-${questionNumber}`).value;
+            const previewDiv = document.getElementById(`question-preview-${questionNumber}`);
+            previewDiv.innerHTML = `
+                <p><strong>Question:</strong> ${text}</p>
+                <p><strong>Type:</strong> ${type}</p>
+            `;
+        }
+    </script>
+</body>
+</html>
