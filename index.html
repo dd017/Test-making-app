@@ -3,414 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Test Maker App</title>
+    <title>Test Maker with Version Control</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            transition: background-color 0.3s;
-        }
-        .dark-mode {
-            background-color: #333;
-            color: #ccc;
+            margin: 20px;
         }
         .hidden {
             display: none;
         }
-        .container {
-            padding: 20px;
+        #version-history, #version-details {
+            margin-top: 20px;
         }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-        }
-        .notification {
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            color: #fff;
-            display: none;
-        }
-        .notification.success {
-            background-color: #4caf50;
-        }
-        .notification.error {
-            background-color: #f44336;
-        }
-        .notification.info {
-            background-color: #2196f3;
-        }
-        .theme-button, .integration-button {
-            padding: 10px;
+        button {
             margin: 5px;
-        }
-        .test-layout-standard .test-question {
-            margin-bottom: 15px;
-        }
-        .test-layout-compact .test-question {
-            margin-bottom: 5px;
-        }
-        .test-layout-expanded .test-question {
-            margin-bottom: 30px;
-        }
-        .avatar-upload input {
-            display: none;
-        }
-        .avatar-upload label {
+            padding: 10px;
+            font-size: 16px;
             cursor: pointer;
-            border: 2px solid #ddd;
-            border-radius: 50%;
-            width: 100px;
-            height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
         }
-        .avatar-upload img {
-            width: 100%;
-            height: auto;
+        .version-list-item {
+            cursor: pointer;
+            margin: 5px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .version-list-item:hover {
+            background-color: #f0f0f0;
         }
     </style>
 </head>
 <body>
-    <div id="notification-container">
-        <div id="success-notification" class="notification success"></div>
-        <div id="error-notification" class="notification error"></div>
-        <div id="info-notification" class="notification info"></div>
-    </div>
-
-    <nav>
-        <button onclick="toggleForm('login')" id="login-button">Login</button>
-        <button onclick="toggleForm('signup')" id="signup-button">Sign Up</button>
-        <button onclick="toggleForm('profile')" id="profile-button" class="hidden">Profile</button>
-        <button onclick="showReports()" id="reports-button" class="hidden">Reports</button>
-        <button onclick="logout()" id="logout-button" class="hidden">Logout</button>
-        <button onclick="toggleForm('test-maker')" id="test-maker-button">Test Maker</button>
-        <button onclick="toggleForm('pool-manager')" id="pool-manager-button">Question Pool Manager</button>
-        <button onclick="toggleForm('collaborate')" id="collaborate-button">Collaborate</button>
-        <button onclick="toggleForm('lms-integration')" id="lms-integration-button">LMS Integration</button>
-        <button onclick="toggleDarkMode()" id="dark-mode-button">Toggle Dark Mode</button>
-    </nav>
-
-    <div class="container">
-        <label for="language-select">Select Language:</label>
-        <select id="language-select" onchange="changeLanguage()">
-            <option value="en">English</option>
-            <option value="es">Spanish</option>
-            <option value="fr">French</option>
-        </select>
-    </div>
-
-    <div class="container" id="customization">
-        <h1>Advanced Customization</h1>
-        <div class="form-group">
-            <label for="theme-select">Select Theme:</label>
-            <select id="theme-select" onchange="applyTheme()">
-                <option value="default">Default</option>
-                <option value="high-contrast">High Contrast</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="layout-select">Select Layout:</label>
-            <select id="layout-select" onchange="applyLayout()">
-                <option value="standard">Standard</option>
-                <option value="compact">Compact</option>
-                <option value="expanded">Expanded</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="custom-css">Custom CSS for Questions:</label>
-            <textarea id="custom-css" rows="4" placeholder="Enter custom CSS here..."></textarea>
-            <button onclick="applyCustomCSS()">Apply Custom CSS</button>
-        </div>
-    </div>
-
-    <div class="container hidden" id="test-maker-form">
+    <div id="test-maker">
         <h1>Test Maker</h1>
-        <div class="form-group"><label for="test-title">Test Title:</label><input type="text" id="test-title"></div>
-        <div class="form-group"><label for="test-description">Test Description:</label><textarea id="test-description" rows="4"></textarea></div>
-        <div class="form-group"><label for="test-start-date">Start Date:</label><input type="date" id="test-start-date"></div>
-        <div class="form-group"><label for="test-end-date">End Date:</label><input type="date" id="test-end-date"></div>
-        <div class="form-group"><label for="question-pool">Question Pool:</label><select id="question-pool"></select></div>
-        <button onclick="addQuestion()">Add Question</button>
-        <button onclick="randomizeQuestions()">Randomize Questions</button>
-        <button onclick="saveTest()">Save Test</button>
-        <button onclick="resetForm()">Reset Form</button>
-        <div id="test-preview" class="test-layout-standard"></div>
+        <form id="test-form">
+            <div>
+                <label for="test-title">Test Title:</label>
+                <input type="text" id="test-title" required>
+            </div>
+            <div>
+                <label for="test-description">Description:</label>
+                <textarea id="test-description" rows="4" required></textarea>
+            </div>
+            <div>
+                <button type="button" onclick="saveTest()">Save Test</button>
+                <button type="button" onclick="showVersionHistory()">View Version History</button>
+            </div>
+        </form>
     </div>
 
-    <div class="container hidden" id="pool-manager-form">
-        <h1>Question Pool Manager</h1>
-        <div class="form-group"><label for="pool-title">Pool Title:</label><input type="text" id="pool-title"></div>
-        <div class="form-group"><label for="pool-description">Pool Description:</label><textarea id="pool-description" rows="4"></textarea></div>
-        <button onclick="createPool()">Create Pool</button>
+    <div id="version-history" class="hidden">
+        <h2>Version History</h2>
+        <ul id="version-list"></ul>
+        <button onclick="hideVersionHistory()">Close</button>
     </div>
 
-    <div class="container hidden" id="reports-form">
-        <h1>Analytics and Reports</h1>
-        <div id="report-container"></div>
-    </div>
-
-    <div class="container hidden" id="collaborate-form">
-        <h1>Manage Collaborators</h1>
-        <div class="form-group"><label for="collaborator-email">Collaborator Email:</label><input type="text" id="collaborator-email"></div>
-        <button onclick="inviteCollaborator()">Invite</button>
-        <div id="collaborators-list"><h2>Collaborators</h2></div>
-    </div>
-
-    <div class="container hidden" id="lms-integration-form">
-        <h1>LMS Integration</h1>
-        <button class="integration-button" onclick="connectLMS()">Connect to LMS</button>
-        <button class="integration-button" onclick="uploadTestToLMS()">Upload Test to LMS</button>
-        <div id="lms-status"></div>
-    </div>
-
-    <div class="container hidden" id="profile-form">
-        <h1>Profile</h1>
-        <div class="avatar-upload">
-            <label for="avatar-upload-input">
-                <img id="avatar-img" src="default-avatar.png" alt="Avatar">
-            </label>
-            <input type="file" id="avatar-upload-input" onchange="updateAvatar()">
-        </div>
-        <div class="form-group"><label for="profile-username">Username:</label><input type="text" id="profile-username"></div>
-        <div class="form-group"><label for="profile-email">Email:</label><input type="email" id="profile-email"></div>
-        <div class="form-group"><label for="profile-bio">Bio:</label><textarea id="profile-bio" rows="4"></textarea></div>
-        <button onclick="saveProfile()">Save Profile</button>
+    <div id="version-details" class="hidden">
+        <h2>Version Details</h2>
+        <div id="version-content"></div>
+        <button onclick="restoreVersion()">Restore Version</button>
+        <button onclick="hideVersionDetails()">Close</button>
     </div>
 
     <script>
-        const ws = new WebSocket('wss://your-websocket-server-url');
+        const testId = 'example-test-id'; 
 
-        ws.onopen = () => console.log('Connected to WebSocket server');
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.type === 'update-question') {
-                const question = document.getElementById(`question-${data.id}`);
-                if (question) {
-                    question.innerHTML = data.html;
-                }
-            }
-        };
-        ws.onclose = () => console.log('Disconnected from WebSocket server');
-
-        function showNotification(type, message) {
-            const notification = document.getElementById(`${type}-notification`);
-            notification.textContent = message;
-            notification.style.display = 'block';
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 5000);
-        }
-
-        function toggleForm(formId) {
-            const forms = ['login', 'signup', 'profile', 'test-maker', 'pool-manager', 'reports', 'collaborate', 'lms-integration'];
-            forms.forEach(id => document.getElementById(`${id}-form`)?.classList.add('hidden'));
-            document.getElementById(`${formId}-form`)?.classList.remove('hidden');
-            changeLanguage();
-        }
-
-        function applyTheme() {
-            document.body.className = document.getElementById('theme-select').value;
-        }
-
-        function applyLayout() {
-            const layout = document.getElementById('layout-select').value;
-            document.getElementById('test-preview').className = `test-layout-${layout}`;
-        }
-
-        function applyCustomCSS() {
-            const customCSS = document.getElementById('custom-css').value;
-            const styleSheet = document.createElement('style');
-            styleSheet.type = 'text/css';
-            styleSheet.innerText = customCSS;
-            document.head.appendChild(styleSheet);
-        }
-
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-        }
-
-        async function login() {
-            const username = document.getElementById('login-username').value;
-            const password = document.getElementById('login-password').value;
-            
-            try {
-                const response = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    loggedInUser = data.user;
-                    document.getElementById('profile-button').classList.remove('hidden');
-                    document.getElementById('logout-button').classList.remove('hidden');
-                    showNotification('success', 'Logged in successfully.');
-                    toggleForm('profile');
-                } else {
-                    showNotification('error', 'Login failed.');
-                }
-            } catch {
-                showNotification('error', 'An error occurred during login.');
-            }
-        }
-
-        async function signup() {
-            const username = document.getElementById('signup-username').value;
-            const password = document.getElementById('signup-password').value;
+        async function saveTest() {
+            const title = document.getElementById('test-title').value;
+            const description = document.getElementById('test-description').value;
+            const content = JSON.stringify({ title, description });
 
             try {
-                const response = await fetch('/api/signup', {
+                const response = await fetch('/api/save-version', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ testId, content })
                 });
 
                 if (response.ok) {
-                    showNotification('success', 'Account created successfully.');
-                    toggleForm('login');
+                    alert('Test version saved successfully.');
                 } else {
-                    showNotification('error', 'Signup failed.');
+                    alert('Failed to save test version.');
                 }
             } catch {
-                showNotification('error', 'An error occurred during signup.');
+                alert('Error saving test version.');
             }
         }
 
-        function logout() {
-            loggedInUser = null;
-            document.getElementById('profile-button').classList.add('hidden');
-            document.getElementById('reports-button').classList.add('hidden');
-            document.getElementById('logout-button').classList.add('hidden');
-            toggleForm('login');
-            showNotification('info', 'Logged out successfully.');
-        }
+        async function showVersionHistory() {
+            try {
+                const response = await fetch(`/api/version-history/${testId}`);
+                const versions = await response.json();
 
-        function saveProfile() {
-            const username = document.getElementById('profile-username').value;
-            const email = document.getElementById('profile-email').value;
-            const bio = document.getElementById('profile-bio').value;
+                const versionList = document.getElementById('version-list');
+                versionList.innerHTML = '';
 
-            showNotification('success', 'Profile updated successfully.');
-        }
+                versions.forEach(version => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `Version ${version.version_number} - ${new Date(version.created_at).toLocaleString()}`;
+                    listItem.className = 'version-list-item';
+                    listItem.onclick = () => showVersionDetails(version.version_id);
+                    versionList.appendChild(listItem);
+                });
 
-        function updateAvatar() {
-            const input = document.getElementById('avatar-upload-input');
-            const file = input.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById('avatar-img').src = e.target.result;
-                    showNotification('success', 'Avatar updated successfully.');
-                };
-                reader.readAsDataURL(file);
+                document.getElementById('version-history').classList.remove('hidden');
+            } catch {
+                alert('Error fetching version history.');
             }
         }
 
-        function addQuestion() {
-            questionCount++;
-            const questionDiv = document.createElement('div');
-            questionDiv.className = 'test-question';
-            questionDiv.id = `question-${questionCount}`;
-            questionDiv.innerHTML = `
-                <h3>Question ${questionCount}</h3>
-                <div class="form-group"><label for="question-text-${questionCount}">Question Text:</label><input type="text" id="question-text-${questionCount}" required></div>
-                <div class="form-group"><label for="question-type-${questionCount}">Question Type:</label><select id="question-type-${questionCount}" required><option value="text">Text</option><option value="multiple-choice">Multiple Choice</option></select></div>
-                <button onclick="editQuestion(${questionCount})">Edit</button>
-                <button onclick="removeQuestion(${questionCount})">Remove</button>
-                <button onclick="previewQuestion(${questionCount})">Preview</button>
-            `;
-            document.getElementById('test-preview').appendChild(questionDiv);
-            showNotification('success', 'Question added successfully.');
-        }
+        async function showVersionDetails(versionId) {
+            try {
+                const response = await fetch(`/api/version/${versionId}`);
+                const version = await response.json();
 
-        function editQuestion(id) {
-            const question = document.getElementById(`question-${id}`);
-            const html = `
-                <h3>Question ${id}</h3>
-                <div class="form-group"><label for="question-text-${id}">Question Text:</label><input type="text" id="question-text-${id}" required></div>
-                <div class="form-group"><label for="question-type-${id}">Question Type:</label><select id="question-type-${id}" required><option value="text">Text</option><option value="multiple-choice">Multiple Choice</option></select></div>
-                <button onclick="editQuestion(${id})">Edit</button>
-                <button onclick="removeQuestion(${id})">Remove</button>
-                <button onclick="previewQuestion(${id})">Preview</button>
-            `;
-            ws.send(JSON.stringify({ type: 'update-question', id, html }));
-        }
-
-        function removeQuestion(id) {
-            document.getElementById(`question-${id}`).remove();
-            showNotification('info', `Question ${id} removed.`);
-        }
-
-        function previewQuestion(id) {}
-
-        function saveTest() {
-            showNotification('success', 'Test saved successfully.');
-        }
-
-        function resetForm() {
-            document.getElementById('test-maker-form').reset();
-            showNotification('info', 'Form reset.');
-        }
-
-        function createPool() {}
-
-        function randomizeQuestions() {}
-
-        function showReports() {
-            document.getElementById('report-container').innerHTML = `
-                <h2>Test Analytics</h2>
-                <p>Completion Rates: 80%</p>
-                <p>Average Score: 75%</p>
-            `;
-        }
-
-        function inviteCollaborator() {
-            const email = document.getElementById('collaborator-email').value;
-            if (email) {
-                document.getElementById('collaborators-list').innerHTML += `<p>${email}</p>`;
-                showNotification('success', `Collaborator ${email} invited.`);
-            } else {
-                showNotification('error', 'Please enter an email.');
+                document.getElementById('version-content').textContent = version.content;
+                document.getElementById('version-details').dataset.versionId = versionId;
+                document.getElementById('version-details').classList.remove('hidden');
+            } catch {
+                alert('Error fetching version details.');
             }
         }
 
-        function updateCollaboratorsList(testId) {}
+        async function restoreVersion() {
+            const versionId = document.getElementById('version-details').dataset.versionId;
 
-        function removeCollaborator(testId, email) {
-            showNotification('info', `Removed collaborator: ${email}`);
-        }
+            try {
+                const response = await fetch('/api/restore-version', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ testId, versionId })
+                });
 
-        function connectLMS() {}
-
-        function uploadTestToLMS() {
-            const testId = prompt('Enter test ID:');
-            if (testId && tests[testId]) {
-                showNotification('success', 'Test uploaded to LMS!');
-            } else {
-                showNotification('error', 'Invalid test ID.');
+                if (response.ok) {
+                    alert('Test restored to the selected version.');
+                } else {
+                    alert('Failed to restore version.');
+                }
+            } catch {
+                alert('Error restoring version.');
             }
         }
 
-        function changeLanguage() {}
+        function hideVersionHistory() {
+            document.getElementById('version-history').classList.add('hidden');
+        }
 
-        let loggedInUser = null;
-        let questionCount = 0;
-        const tests = {};
-        const pools = {};
-        const collaborators = {};
+        function hideVersionDetails() {
+            document.getElementById('version-details').classList.add('hidden');
+        }
     </script>
 </body>
 </html>
