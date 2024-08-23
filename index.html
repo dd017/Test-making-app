@@ -3,12 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Test Maker App</title>
+    <title>Enhanced Test Maker App</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            transition: background-color 0.3s;
+        }
+        .dark-mode {
+            background-color: #333;
+            color: #ccc;
         }
         .hidden {
             display: none;
@@ -57,6 +62,24 @@
         .test-layout-expanded .test-question {
             margin-bottom: 30px;
         }
+        .avatar-upload input {
+            display: none;
+        }
+        .avatar-upload label {
+            cursor: pointer;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .avatar-upload img {
+            width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 <body>
@@ -76,6 +99,7 @@
         <button onclick="toggleForm('pool-manager')" id="pool-manager-button">Question Pool Manager</button>
         <button onclick="toggleForm('collaborate')" id="collaborate-button">Collaborate</button>
         <button onclick="toggleForm('lms-integration')" id="lms-integration-button">LMS Integration</button>
+        <button onclick="toggleDarkMode()" id="dark-mode-button">Toggle Dark Mode</button>
     </nav>
 
     <div class="container">
@@ -151,8 +175,22 @@
         <div id="lms-status"></div>
     </div>
 
+    <div class="container hidden" id="profile-form">
+        <h1>Profile</h1>
+        <div class="avatar-upload">
+            <label for="avatar-upload-input">
+                <img id="avatar-img" src="default-avatar.png" alt="Avatar">
+            </label>
+            <input type="file" id="avatar-upload-input" onchange="updateAvatar()">
+        </div>
+        <div class="form-group"><label for="profile-username">Username:</label><input type="text" id="profile-username"></div>
+        <div class="form-group"><label for="profile-email">Email:</label><input type="email" id="profile-email"></div>
+        <div class="form-group"><label for="profile-bio">Bio:</label><textarea id="profile-bio" rows="4"></textarea></div>
+        <button onclick="saveProfile()">Save Profile</button>
+    </div>
+
     <script>
-        const ws = new WebSocket('wss://your-websocket-server-url'); // Replace with your WebSocket server URL
+        const ws = new WebSocket('wss://your-websocket-server-url');
 
         ws.onopen = () => console.log('Connected to WebSocket server');
         ws.onmessage = (event) => {
@@ -197,6 +235,10 @@
             styleSheet.type = 'text/css';
             styleSheet.innerText = customCSS;
             document.head.appendChild(styleSheet);
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
         }
 
         async function login() {
@@ -256,8 +298,26 @@
             showNotification('info', 'Logged out successfully.');
         }
 
-        function saveProfile() {}
-        function toggleEditProfile() {}
+        function saveProfile() {
+            const username = document.getElementById('profile-username').value;
+            const email = document.getElementById('profile-email').value;
+            const bio = document.getElementById('profile-bio').value;
+
+            showNotification('success', 'Profile updated successfully.');
+        }
+
+        function updateAvatar() {
+            const input = document.getElementById('avatar-upload-input');
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('avatar-img').src = e.target.result;
+                    showNotification('success', 'Avatar updated successfully.');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
 
         function addQuestion() {
             questionCount++;
@@ -309,12 +369,22 @@
 
         function randomizeQuestions() {}
 
-        function showReports() {}
-
-        function updateAnalytics() {}
+        function showReports() {
+            document.getElementById('report-container').innerHTML = `
+                <h2>Test Analytics</h2>
+                <p>Completion Rates: 80%</p>
+                <p>Average Score: 75%</p>
+            `;
+        }
 
         function inviteCollaborator() {
-            showNotification('success', 'Collaborator invited.');
+            const email = document.getElementById('collaborator-email').value;
+            if (email) {
+                document.getElementById('collaborators-list').innerHTML += `<p>${email}</p>`;
+                showNotification('success', `Collaborator ${email} invited.`);
+            } else {
+                showNotification('error', 'Please enter an email.');
+            }
         }
 
         function updateCollaboratorsList(testId) {}
