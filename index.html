@@ -165,7 +165,7 @@
             const forms = ['login', 'signup', 'profile', 'test-maker', 'pool-manager', 'reports', 'collaborate', 'lms-integration'];
             forms.forEach(id => document.getElementById(`${id}-form`)?.classList.add('hidden'));
             document.getElementById(`${formId}-form`)?.classList.remove('hidden');
-            changeLanguage(); 
+            changeLanguage();
         }
 
         function applyTheme() {
@@ -189,21 +189,25 @@
             const username = document.getElementById('login-username').value;
             const password = document.getElementById('login-password').value;
             
-            const response = await fetch('/api/login', { 
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                loggedInUser = data.user;
-                document.getElementById('profile-button').classList.remove('hidden');
-                document.getElementById('logout-button').classList.remove('hidden');
-                showNotification('success', 'Logged in successfully.');
-                toggleForm('profile');
-            } else {
-                showNotification('error', 'Login failed.');
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    loggedInUser = data.user;
+                    document.getElementById('profile-button').classList.remove('hidden');
+                    document.getElementById('logout-button').classList.remove('hidden');
+                    showNotification('success', 'Logged in successfully.');
+                    toggleForm('profile');
+                } else {
+                    showNotification('error', 'Login failed.');
+                }
+            } catch {
+                showNotification('error', 'An error occurred during login.');
             }
         }
 
@@ -211,17 +215,21 @@
             const username = document.getElementById('signup-username').value;
             const password = document.getElementById('signup-password').value;
 
-            const response = await fetch('/api/signup', { // Assuming a backend API endpoint
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
+            try {
+                const response = await fetch('/api/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
 
-            if (response.ok) {
-                showNotification('success', 'Account created successfully.');
-                toggleForm('login');
-            } else {
-                showNotification('error', 'Signup failed.');
+                if (response.ok) {
+                    showNotification('success', 'Account created successfully.');
+                    toggleForm('login');
+                } else {
+                    showNotification('error', 'Signup failed.');
+                }
+            } catch {
+                showNotification('error', 'An error occurred during signup.');
             }
         }
 
@@ -234,8 +242,8 @@
             showNotification('info', 'Logged out successfully.');
         }
 
-        function saveProfile() 
-        function toggleEditProfile() 
+        function saveProfile() {}
+        function toggleEditProfile() {}
 
         function addQuestion() {
             questionCount++;
@@ -254,12 +262,12 @@
             showNotification('success', 'Question added successfully.');
         }
 
-        function editQuestion(id)
+        function editQuestion(id) {}
         function removeQuestion(id) {
             document.getElementById(`question-${id}`).remove();
             showNotification('info', `Question ${id} removed.`);
         }
-        function previewQuestion(id) 
+        function previewQuestion(id) {}
         function saveTest() {
             showNotification('success', 'Test saved successfully.');
         }
@@ -267,19 +275,19 @@
             document.getElementById('test-maker-form').reset();
             showNotification('info', 'Form reset.');
         }
-        function createPool() 
-        function randomizeQuestions() 
-        function showReports() 
-        function updateAnalytics() 
+        function createPool() {}
+        function randomizeQuestions() {}
+        function showReports() {}
+        function updateAnalytics() {}
         function inviteCollaborator() {
             showNotification('success', 'Collaborator invited.');
         }
-        function updateCollaboratorsList(testId) 
+        function updateCollaboratorsList(testId) {}
         function removeCollaborator(testId, email) {
             showNotification('info', `Removed collaborator: ${email}`);
         }
 
-        function connectLMS() 
+        function connectLMS() {}
         function uploadTestToLMS() {
             const testId = prompt('Enter test ID:');
             if (testId && tests[testId]) {
@@ -289,7 +297,7 @@
             }
         }
 
-        function changeLanguage() 
+        function changeLanguage() {}
 
         let loggedInUser = null;
         let questionCount = 0;
