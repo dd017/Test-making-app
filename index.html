@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Complete Test Maker with Features</title>
+    <title>Enhanced Test Maker with Features</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -38,6 +38,9 @@
         }
         nav button:hover {
             background-color: #003f7f;
+        }
+        nav button:focus {
+            outline: 2px solid #003f7f;
         }
         main {
             padding: 20px;
@@ -89,6 +92,39 @@
         }
         #dark-mode-toggle {
             margin-left: 10px;
+        }
+        #modal-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        #auth-modal {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        #notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .notification {
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -160,6 +196,26 @@
         <p>&copy; 2024 Test Maker</p>
     </footer>
 
+    <!-- Modal for Authentication -->
+    <div id="modal-background">
+        <div id="auth-modal">
+            <h2 id="modal-title">Login</h2>
+            <form id="auth-form">
+                <label for="email">Email:</label>
+                <input type="email" id="email" required>
+                
+                <label for="password">Password:</label>
+                <input type="password" id="password" required>
+                
+                <button type="submit" id="auth-submit-button">Submit</button>
+            </form>
+            <button onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container"></div>
+
     <script>
         // Dark Mode Toggle
         const darkModeToggle = document.getElementById('dark-mode-toggle');
@@ -177,25 +233,66 @@
             }
         });
 
+        // Modal Logic
+        const modalBackground = document.getElementById('modal-background');
+        const modalTitle = document.getElementById('modal-title');
+        const authForm = document.getElementById('auth-form');
+        const loginButton = document.getElementById('login-button');
+        const signupButton = document.getElementById('signup-button');
+
+        loginButton.addEventListener('click', () => openModal('Login'));
+        signupButton.addEventListener('click', () => openModal('Sign Up'));
+
+        function openModal(type) {
+            modalTitle.textContent = type;
+            modalBackground.style.display = 'flex';
+        }
+
+        function closeModal() {
+            modalBackground.style.display = 'none';
+        }
+
+        authForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            closeModal();
+            showNotification(`Successfully ${modalTitle.textContent.toLowerCase()}ed!`);
+        });
+
+        // Notifications
+        function showNotification(message) {
+            const notificationContainer = document.getElementById('notification-container');
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+
+            notificationContainer.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
         // Placeholder functions for app features
         function saveTest() {
-            alert('Test saved!');
+            showNotification('Test saved successfully!');
         }
 
         function showVersionHistory() {
-            alert('Showing version history...');
+            showNotification('Version history displayed.');
         }
 
         function generateQuestions() {
             document.getElementById('generated-questions').innerHTML = '<p>Generated question example...</p>';
+            showNotification('Questions generated successfully!');
         }
 
         function addCollaborator() {
-            alert('Collaborator added!');
+            showNotification('Collaborator added successfully!');
         }
 
         function viewAnalytics() {
             document.getElementById('analytics-details').innerHTML = '<p>Analytics data displayed here...</p>';
+            showNotification('Analytics viewed successfully!');
         }
     </script>
 </body>
