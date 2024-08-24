@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Test Maker with New Features</title>
+    <title>Ultimate Test Maker</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,6 +24,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px;
+            flex-wrap: wrap;
         }
         nav h1 {
             margin: 0;
@@ -56,7 +57,7 @@
             display: block;
             margin-top: 10px;
         }
-        input, textarea, button {
+        input, textarea, select, button {
             width: 100%;
             padding: 10px;
             margin-top: 5px;
@@ -144,10 +145,18 @@
             padding: 8px;
             background-color: #e1e1e1;
             border-radius: 4px;
+            position: relative;
         }
         #chat-messages li.sent {
             background-color: #007BFF;
             color: white;
+        }
+        #chat-messages li span.timestamp {
+            position: absolute;
+            right: 10px;
+            bottom: 5px;
+            font-size: 0.8em;
+            color: #666;
         }
         #timer {
             font-size: 18px;
@@ -172,6 +181,9 @@
         #profile-section button {
             margin-top: 10px;
         }
+        canvas {
+            max-width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -193,6 +205,10 @@
             <img id="profile-picture" src="default-avatar.png" alt="Profile Picture">
             <input type="file" id="upload-picture" accept="image/*">
             <label for="upload-picture">Change Profile Picture</label>
+            <label for="profile-name">Name:</label>
+            <input type="text" id="profile-name" placeholder="Your Name">
+            <label for="profile-email">Email:</label>
+            <input type="email" id="profile-email" placeholder="Your Email">
             <button onclick="updateProfile()">Update Profile</button>
         </section>
 
@@ -205,6 +221,17 @@
                 
                 <label for="test-description">Description:</label>
                 <textarea id="test-description" rows="4" required></textarea>
+                
+                <label for="test-category">Category:</label>
+                <select id="test-category">
+                    <option value="Math">Math</option>
+                    <option value="Science">Science</option>
+                    <option value="History">History</option>
+                    <option value="Language">Language</option>
+                </select>
+
+                <label for="test-tags">Tags (comma separated):</label>
+                <input type="text" id="test-tags" placeholder="e.g., Algebra, Physics">
                 
                 <button type="button" onclick="saveTest()">Save Test</button>
                 <button type="button" onclick="shareTest()">Share Test</button>
@@ -234,50 +261,42 @@
             <div id="collaborators-list"></div>
             <div id="chat-container">
                 <ul id="chat-messages"></ul>
-                <input type="text" id="chat-input" placeholder="Type a message...">
+                <input type="text" id="chat-input" placeholder="Type your message...">
                 <button onclick="sendMessage()">Send</button>
             </div>
         </section>
 
         <!-- Analytics Section -->
-        <section id="analytics-reporting">
-            <h2>Advanced Analytics</h2>
+        <section id="analytics">
+            <h2>View Analytics</h2>
             <button type="button" onclick="viewAnalytics()">View Analytics</button>
             <button type="button" onclick="downloadReport()">Download Report</button>
             <div id="analytics-details"></div>
-        </section>
-
-        <!-- Notification Section -->
-        <section id="notifications">
-            <h2>Notifications</h2>
-            <div id="notification-list"></div>
+            <canvas id="analytics-chart"></canvas>
         </section>
     </main>
 
     <footer>
-        <p>&copy; 2024 Test Maker</p>
+        <p>&copy; 2024 Ultimate Test Maker</p>
     </footer>
 
-    <!-- Modal for Authentication -->
+    <!-- Modal Background -->
     <div id="modal-background">
         <div id="auth-modal">
-            <h2 id="modal-title">Login</h2>
-            <form id="auth-form">
-                <label for="email">Email:</label>
-                <input type="email" id="email" required>
-                
-                <label for="password">Password:</label>
-                <input type="password" id="password" required>
-                
-                <button type="submit" id="auth-submit-button">Submit</button>
-            </form>
-            <button onclick="closeModal()">Close</button>
+            <h2 id="modal-title"></h2>
+            <label for="auth-email">Email:</label>
+            <input type="email" id="auth-email" placeholder="Your Email" required>
+            <label for="auth-password">Password:</label>
+            <input type="password" id="auth-password" placeholder="Your Password" required>
+            <button id="auth-submit-button"></button>
+            <button onclick="closeModal()">Cancel</button>
         </div>
     </div>
 
     <!-- Notification Container -->
     <div id="notification-container"></div>
 
+    <!-- JavaScript -->
     <script>
         // Dark Mode Toggle
         document.getElementById('dark-mode-toggle').addEventListener('click', function() {
@@ -375,6 +394,11 @@
                 const li = document.createElement('li');
                 li.className = 'sent';
                 li.innerText = message;
+                const timestamp = document.createElement('span');
+                timestamp.className = 'timestamp';
+                const now = new Date();
+                timestamp.innerText = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+                li.appendChild(timestamp);
                 document.getElementById('chat-messages').appendChild(li);
                 input.value = '';
                 input.focus();
@@ -386,6 +410,20 @@
         function viewAnalytics() {
             document.getElementById('analytics-details').innerHTML = '<p>Analytics data displayed here...</p>';
             showNotification('Analytics viewed successfully!');
+
+            // Chart Example
+            const ctx = document.getElementById('analytics-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Test 1', 'Test 2', 'Test 3'],
+                    datasets: [{
+                        label: 'Completion Rate',
+                        data: [85, 90, 75],
+                        backgroundColor: ['#007BFF', '#28a745', '#dc3545']
+                    }]
+                }
+            });
         }
 
         // Download Report
