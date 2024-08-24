@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Test Maker with Features</title>
+    <title>Advanced Test Maker with New Features</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -126,6 +126,52 @@
             margin-bottom: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+        #chat-container {
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: #f1f1f1;
+        }
+        #chat-messages {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        #chat-messages li {
+            margin-bottom: 10px;
+            padding: 8px;
+            background-color: #e1e1e1;
+            border-radius: 4px;
+        }
+        #chat-messages li.sent {
+            background-color: #007BFF;
+            color: white;
+        }
+        #timer {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        #profile-section img {
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+        #profile-section input[type="file"] {
+            display: none;
+        }
+        #profile-section label {
+            cursor: pointer;
+            color: #007BFF;
+            text-decoration: underline;
+        }
+        #profile-section button {
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -141,9 +187,18 @@
     </header>
 
     <main>
+        <!-- Profile Management Section -->
+        <section id="profile-section">
+            <h2>Profile Management</h2>
+            <img id="profile-picture" src="default-avatar.png" alt="Profile Picture">
+            <input type="file" id="upload-picture" accept="image/*">
+            <label for="upload-picture">Change Profile Picture</label>
+            <button onclick="updateProfile()">Update Profile</button>
+        </section>
+
         <!-- Test Maker Section -->
         <section id="test-maker">
-            <h2>Create Test</h2>
+            <h2>Create Test <span id="timer">00:00:00</span></h2>
             <form id="test-form">
                 <label for="test-title">Test Title:</label>
                 <input type="text" id="test-title" required>
@@ -152,6 +207,7 @@
                 <textarea id="test-description" rows="4" required></textarea>
                 
                 <button type="button" onclick="saveTest()">Save Test</button>
+                <button type="button" onclick="shareTest()">Share Test</button>
                 <button type="button" onclick="showVersionHistory()">Version History</button>
             </form>
         </section>
@@ -176,12 +232,18 @@
                 <button type="button" onclick="addCollaborator()">Add Collaborator</button>
             </form>
             <div id="collaborators-list"></div>
+            <div id="chat-container">
+                <ul id="chat-messages"></ul>
+                <input type="text" id="chat-input" placeholder="Type a message...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
         </section>
 
         <!-- Analytics Section -->
         <section id="analytics-reporting">
             <h2>Advanced Analytics</h2>
             <button type="button" onclick="viewAnalytics()">View Analytics</button>
+            <button type="button" onclick="downloadReport()">Download Report</button>
             <div id="analytics-details"></div>
         </section>
 
@@ -218,81 +280,117 @@
 
     <script>
         // Dark Mode Toggle
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        darkModeToggle.addEventListener('click', () => {
+        document.getElementById('dark-mode-toggle').addEventListener('click', function() {
             document.body.classList.toggle('dark-mode');
-            const theme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
-            localStorage.setItem('theme', theme);
         });
 
-        // Load theme from localStorage
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
-                document.body.classList.add('dark-mode');
-            }
-        });
-
-        // Modal Logic
-        const modalBackground = document.getElementById('modal-background');
-        const modalTitle = document.getElementById('modal-title');
-        const authForm = document.getElementById('auth-form');
-        const loginButton = document.getElementById('login-button');
-        const signupButton = document.getElementById('signup-button');
-
-        loginButton.addEventListener('click', () => openModal('Login'));
-        signupButton.addEventListener('click', () => openModal('Sign Up'));
-
+        // Modal Management
         function openModal(type) {
-            modalTitle.textContent = type;
-            modalBackground.style.display = 'flex';
+            document.getElementById('modal-title').innerText = type;
+            document.getElementById('auth-submit-button').innerText = type;
+            document.getElementById('modal-background').style.display = 'flex';
         }
 
         function closeModal() {
-            modalBackground.style.display = 'none';
+            document.getElementById('modal-background').style.display = 'none';
         }
 
-        authForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            closeModal();
-            showNotification(`Successfully ${modalTitle.textContent.toLowerCase()}ed!`);
+        document.getElementById('login-button').addEventListener('click', function() {
+            openModal('Login');
         });
 
-        // Notifications
+        document.getElementById('signup-button').addEventListener('click', function() {
+            openModal('Sign Up');
+        });
+
+        // Notification System
         function showNotification(message) {
-            const notificationContainer = document.getElementById('notification-container');
+            const container = document.getElementById('notification-container');
             const notification = document.createElement('div');
             notification.className = 'notification';
-            notification.textContent = message;
-
-            notificationContainer.appendChild(notification);
+            notification.innerText = message;
+            container.appendChild(notification);
 
             setTimeout(() => {
-                notification.remove();
+                container.removeChild(notification);
             }, 3000);
         }
 
-        // Placeholder functions for app features
+        // Profile Management
+        function updateProfile() {
+            showNotification('Profile updated successfully!');
+        }
+
+        // Timer Logic
+        let timerInterval;
+        let seconds = 0;
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                seconds++;
+                const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+                const secs = String(seconds % 60).padStart(2, '0');
+                document.getElementById('timer').innerText = `${hrs}:${mins}:${secs}`;
+            }, 1000);
+        }
+
+        startTimer();
+
+        // Save Test
         function saveTest() {
             showNotification('Test saved successfully!');
         }
 
-        function showVersionHistory() {
-            showNotification('Version history displayed.');
+        // Share Test
+        function shareTest() {
+            const testLink = "https://example.com/shared-test";
+            navigator.clipboard.writeText(testLink).then(() => {
+                showNotification('Test link copied to clipboard!');
+            });
         }
 
+        // Version History
+        function showVersionHistory() {
+            document.getElementById('generated-questions').innerHTML = '<p>Version history displayed here...</p>';
+            showNotification('Version history viewed successfully!');
+        }
+
+        // Generate Questions
         function generateQuestions() {
             document.getElementById('generated-questions').innerHTML = '<p>Generated question example...</p>';
             showNotification('Questions generated successfully!');
         }
 
+        // Add Collaborator
         function addCollaborator() {
             showNotification('Collaborator added successfully!');
         }
 
+        // Real-Time Chat
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (message) {
+                const li = document.createElement('li');
+                li.className = 'sent';
+                li.innerText = message;
+                document.getElementById('chat-messages').appendChild(li);
+                input.value = '';
+                input.focus();
+                showNotification('Message sent!');
+            }
+        }
+
+        // View Analytics
         function viewAnalytics() {
             document.getElementById('analytics-details').innerHTML = '<p>Analytics data displayed here...</p>';
             showNotification('Analytics viewed successfully!');
+        }
+
+        // Download Report
+        function downloadReport() {
+            showNotification('Report downloaded successfully!');
         }
     </script>
 </body>
